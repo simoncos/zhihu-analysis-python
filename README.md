@@ -6,6 +6,13 @@
 
 注：目前`zhihu-python`最新版本已与本项目不兼容，但在[这里](https://github.com/simoncos/zhihu-analysis-python/tree/master/crawler)你可以找到其在本项目中所使用的源代码版本。
 
+## 文件说明
+
+- crawler文件夹：爬虫部分，以广度优先策略爬取知乎数据并存入CSV
+- zhihu_schema.sql：SQLite数据库的Schema
+- zhihu_database.py：将CSV中的数据导入至数据库中
+- zhihu_analysis.py：从数据库中提取数据并进行分析
+
 ## 详细内容
 
 - 中文
@@ -13,10 +20,3 @@
 	- 知乎社交网络分析（下）：关注网络
 - English
 	- [Project Report](https://github.com/simoncos/zhihu-analysis-python/tree/master/analysis-report)
-
-## 文件说明
-
-- crawler文件夹：爬虫部分，以广度优先策略爬取知乎数据并存入CSV
-- zhihu_schema：SQLite数据库的Schema
-- zhihu_database：将CSV中的数据导入至数据库中
-- zhihu_analysis：从数据库中提取数据并进行分析
