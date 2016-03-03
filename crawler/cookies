@@ -1,5 +1,0 @@
-#LWP-Cookies-2.0
-Set-Cookie3: cap_id="\"YjhlNDlkMTMwNjc4NDU1YmIxYjgxYTYwZjgzNzljZGQ=|1448431433|e9b1eea30eeac1eb9edf343e8b9cd1be2689a35b\""; path="/"; domain=".zhihu.com"; path_spec; expires="2015-12-25 06:03:53Z"; version=0
-Set-Cookie3: q_c1="899f566dcf0541ce99578b3c9e3fd9f6|1448431433000|1448431433000"; path="/"; domain=".zhihu.com"; path_spec; expires="2018-11-24 06:03:53Z"; version=0
-Set-Cookie3: unlock_ticket="\"QUFDQXNjOHZBQUFYQUFBQVlRSlZUV1ZXVlZZaW1kVU9EZEFrcC01aEVoakFmOVU4SE9UNWRnPT0=|1448431453|c4d2efa3ffb19f0d9cc8d808f0b21c6c0be744d5\""; path="/"; domain=".zhihu.com"; path_spec; expires="2015-11-25 06:33:13Z"; version=0
-Set-Cookie3: z_c0="\"QUFDQXNjOHZBQUFYQUFBQVlRSlZUVjNjZkZZanJvb3FYNlIzSkZaaU5FZm1aLXNBU0hWR2J3PT0=|1448431453|d36c39266bb6bc8367c9d45310c82d9c3e531f75\""; path="/"; domain=".zhihu.com"; path_spec; expires="2016-11-24 06:04:13Z"; httponly=None; version=0
