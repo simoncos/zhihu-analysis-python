@@ -61,7 +61,7 @@ def following_to_sqlite_1_to_n():
             record_id = "NULL"
             user_url = "\'" + str(row[1][0]) + "\'"
             #handle duplicate with distinct index
-            for followee in str(row[1][1]).split(' '): # should change to \t later            
+            for followee in str(row[1][1]).split('\t'):            
                 followee_url = "\'" + followee + "\'"                
                 try:
                     command = "INSERT INTO following VALUES(" + record_id + "," + user_url + "," + followee_url + ")"        
@@ -75,7 +75,7 @@ def following_to_sqlite_1_to_n():
 
 def following_to_sqlite_1_to_1():
     '''
-    User's followees
+    User's followees; This method is not used due to the format of crawling result csv.
     '''
     conn = sqlite3.connect("zhihu.db") 
 
