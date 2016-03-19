@@ -18,6 +18,6 @@
 - [Dataset](http://pan.baidu.com/s/1bos5RqR)
 - 中文
 	- [知乎社交网络分析（上）：基本统计](http://www.jianshu.com/p/60ffb949113f)
-	- 知乎社交网络分析（下）：关注网络
+	- [知乎社交网络分析（下）：关注网络](http://www.jianshu.com/p/3b2a1895a12d)
 - English
 	- [Project Report](https://github.com/simoncos/zhihu-analysis-python/tree/master/analysis-report)
