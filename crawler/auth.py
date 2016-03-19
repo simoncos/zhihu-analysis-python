@@ -202,8 +202,8 @@ def login(account=None, password=None):
     if account == None:
         # account  = raw_input("请输入登录帐号: ")
         # password = raw_input("请输入登录密码: ")
-        account = 'lzs24@sina.cn'
-        password = 'asd668844'
+        account = ''
+        password = ''
 
 
     form_data = build_form(account, password)
