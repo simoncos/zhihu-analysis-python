@@ -88,8 +88,8 @@ def density_centrality():
     ##print nx.average_shortest_path_length(G), '\n'
     print 'density of graph:', nx.density(G)
 
-    user_betweenness_list = sorted(nx.betweenness_centrality(G).items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
-    betweenness_list = zip(*user_betweenness_list)[1]# tuple of elements like: 0.0006937913420042883
+    user_betweenness_list = sorted(nx.betweenness_centrality(G).items(), lambda x, y: cmp(x[1], y[1]), reverse=True) #result like [(2, 0.0), (3, 0.0), (1, 1.0)]
+    betweenness_list = zip(*user_betweenness_list)[1]# result like: [(2, 3, 1), (0.0, 0.0, 1.0)][1]; zip(*) is like un zip()
 
     #betweenness_count_pairs = collections.Counter(list(betweenness_list)).most_common() # list of element like: (0.0006937913420042883, 1)
     #b_value = zip(*betweenness_count_pairs)[0] #unzip to get 0.0006937913420042883
@@ -106,7 +106,7 @@ def density_centrality():
     pylab.ylabel('Betweeness of the User')       
     pylab.scatter(list(range(len(betweenness_list))), betweenness_list)
 
-    user_closeness_list = sorted(nx.closeness_centrality(G).items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
+    user_closeness_list = sorted(nx.closeness_centrality(G).items(), lambda x, y: cmp(x[1], y[1]), reverse=True) #Dict.items(): {1: 1.0, 2: 0.0, 3: 0.0} -> [(1, 1.0), (2, 0.0), (3, 0.0)]
     closeness_list = zip(*user_closeness_list)[1]   
 
     #closeness_count_pairs = collections.Counter(list(closeness_list)).most_common()
