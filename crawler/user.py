@@ -17,6 +17,18 @@ import Queue
 import time
 import requests
 
+# control parameter
+crawlLayerNum = 3#1 for testing
+# seed user, act as the first item in the taskqueue
+user_url = "https://www.zhihu.com/people/zhao-che"
+# user_url = "https://www.zhihu.com/people/bao-jie-14"
+# number of processes
+processNum = 4
+
+prefix_people = "https://www.zhihu.com/people/"
+prefix_question = "https://www.zhihu.com/question/"
+
+
 class UserInfo:
     """
     """
@@ -46,8 +58,9 @@ class UserQuestion:
     def __init__(self, userinfo):
         self.user_uuid = userinfo.uuid
         self.questionids = set()
-        urls = userinfo.user.get_questionids()
-        for qurl in urls:
+        answers = userinfo.user.get_answers()
+        for a in answers:
+            qurl = a.get_question().url
             qid = qurl.replace(prefix_question, "")
             self.questionids.add(qid)
 
@@ -87,18 +100,6 @@ class TaskItem:
 
     def tostring(self):
         return "%s\t%s" % (self.user_uuid, self.layer)
-
-# control parameter
-crawlLayerNum = 3#1 for testing
-# seed user, act as the first item in the taskqueue
-user_url = "http://www.zhihu.com/people/zhao-che"
-# user_url = "http://www.zhihu.com/people/bao-jie-14"
-# number of processes
-processNum = 4
-
-prefix_people = "http://www.zhihu.com/people/"
-prefix_question = "http://www.zhihu.com/question/"
-
 
 def crawlUserInfo(queue, flag, vset, equeue):
     pname = mp.current_process().name

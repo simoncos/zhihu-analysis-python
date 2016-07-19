@@ -20,7 +20,7 @@ import requests
 
 # number of processes
 processNum = 12
-prefix_question = "http://www.zhihu.com/question/"
+prefix_question = "https://www.zhihu.com/question/"
 
 def crawlTopic(queue, equeue):
     pname = mp.current_process().name
