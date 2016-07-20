@@ -269,9 +269,9 @@ class Column:
                 headers = {
                     'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                     'Host': "www.zhihu.com",
-                    'Origin': "http://www.zhihu.com",
+                    'Origin': "https://www.zhihu.com",
                     'Pragma': "no-cache",
-                    'Referer': "http://www.zhihu.com/"
+                    'Referer': "https://www.zhihu.com/"
                 }
                 r = requests.get(url, params=parm, headers=headers, verify=False)
                 posts_list = r.json()
@@ -296,9 +296,9 @@ class Question:
         headers = {
             'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
             'Host': "www.zhihu.com",
-            'Origin': "http://www.zhihu.com",
+            'Origin': "https://www.zhihu.com",
             'Pragma': "no-cache",
-            'Referer': "http://www.zhihu.com/"
+            'Referer': "https://www.zhihu.com/"
         }
         r = requests.get(self.url,headers=headers, verify=False)
         self.soup = BeautifulSoup(r.content, "lxml")
@@ -393,7 +393,7 @@ class Question:
                         else:
                             author_tag = soup.find_all("div", class_="zm-item-answer-author-info")[j].find_all("a")[1]
                             author_id = author_tag.string.encode("utf-8")
-                            author_url = "http://www.zhihu.com" + author_tag["href"]
+                            author_url = "https://www.zhihu.com" + author_tag["href"]
                             author = User(author_url, author_id)
 
                         if is_my_answer == True:
@@ -407,7 +407,7 @@ class Question:
                         else:
                             upvote = int(count)
 
-                        answer_url = "http://www.zhihu.com" + soup.find_all("a", class_="answer-date-link")[j]["href"]
+                        answer_url = "https://www.zhihu.com" + soup.find_all("a", class_="answer-date-link")[j]["href"]
 
                         answer = soup.find_all("div", class_="zm-editable-content clearfix")[j - error_answer_count]
                         soup.body.extract()
@@ -426,7 +426,7 @@ class Question:
                         answer = Answer(answer_url, self, author, upvote, content)
                         yield answer
                 else:
-                    post_url = "http://www.zhihu.com/node/QuestionAnswerListV2"
+                    post_url = "https://www.zhihu.com/node/QuestionAnswerListV2"
                     _xsrf = self.soup.find("input", attrs={'name': '_xsrf'})["value"]
                     offset = i * 20
                     params = json.dumps(
@@ -459,7 +459,7 @@ class Question:
                         else:
                             author_tag = answer_soup.find("div", class_="zm-item-answer-author-info").find_all("a")[1]
                             author_id = author_tag.string.encode("utf-8")
-                            author_url = "http://www.zhihu.com" + author_tag["href"]
+                            author_url = "https://www.zhihu.com" + author_tag["href"]
                             author = User(author_url, author_id)
 
                         if answer_soup.find("span", class_="count") == None:
@@ -473,7 +473,7 @@ class Question:
                         else:
                             upvote = int(count)
 
-                        answer_url = "http://www.zhihu.com" + answer_soup.find("a", class_="answer-date-link")["href"]
+                        answer_url = "https://www.zhihu.com" + answer_soup.find("a", class_="answer-date-link")["href"]
 
                         answer = answer_soup.find("div", class_="zm-editable-content clearfix")
                         soup.body.extract()
@@ -533,9 +533,9 @@ class User:
         headers = {
             'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
             'Host': "www.zhihu.com",
-            'Origin': "http://www.zhihu.com",
+            'Origin': "https://www.zhihu.com",
             'Pragma': "no-cache",
-            'Referer': "http://www.zhihu.com/"
+            'Referer': "https://www.zhihu.com/"
         }
         r = requests.get(self.user_url, headers=headers, verify=False)
         soup = BeautifulSoup(r.content, "lxml")
@@ -740,9 +740,9 @@ class User:
                 headers = {
                     'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                     'Host': "www.zhihu.com",
-                    'Origin': "http://www.zhihu.com",
+                    'Origin': "https://www.zhihu.com",
                     'Pragma': "no-cache",
-                    'Referer': "http://www.zhihu.com/"
+                    'Referer': "https://www.zhihu.com/"
                 }
                 r = requests.get(followee_url, headers=headers, verify=False)
 
@@ -753,7 +753,7 @@ class User:
                         for j in xrange(min(followees_num, 20)):
                             yield User(user_url_list[j].a["href"], user_url_list[j].a.string.encode("utf-8"))
                     else:
-                        post_url = "http://www.zhihu.com/node/ProfileFolloweesListV2"
+                        post_url = "https://www.zhihu.com/node/ProfileFolloweesListV2"
                         _xsrf = soup.find("input", attrs={'name': '_xsrf'})["value"]
                         offset = i * 20
                         hash_id = re.findall("hash_id&quot;: &quot;(.*)&quot;},", r.text)[0]
@@ -792,9 +792,9 @@ class User:
                 headers = {
                     'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                     'Host': "www.zhihu.com",
-                    'Origin': "http://www.zhihu.com",
+                    'Origin': "https://www.zhihu.com",
                     'Pragma': "no-cache",
-                    'Referer': "http://www.zhihu.com/"
+                    'Referer': "https://www.zhihu.com/"
                 }
                 r = requests.get(follower_url, headers=headers, verify=False)
 
@@ -805,7 +805,7 @@ class User:
                         for j in xrange(min(followers_num, 20)):
                             yield User(user_url_list[j].a["href"], user_url_list[j].a.string.encode("utf-8"))
                     else:
-                        post_url = "http://www.zhihu.com/node/ProfileFollowersListV2"
+                        post_url = "https://www.zhihu.com/node/ProfileFollowersListV2"
                         _xsrf = soup.find("input", attrs={'name': '_xsrf'})["value"]
                         offset = i * 20
                         hash_id = re.findall("hash_id&quot;: &quot;(.*)&quot;},", r.text)[0]
@@ -844,9 +844,9 @@ class User:
                 headers = {
                     'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                     'Host': "www.zhihu.com",
-                    'Origin': "http://www.zhihu.com",
+                    'Origin': "https://www.zhihu.com",
                     'Pragma': "no-cache",
-                    'Referer': "http://www.zhihu.com/"
+                    'Referer': "https://www.zhihu.com/"
                 }
                 r = requests.get(topics_url, headers=headers, verify=False)
                 soup = BeautifulSoup(r.content, "lxml")
@@ -898,15 +898,15 @@ class User:
                     headers = {
                         'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                         'Host': "www.zhihu.com",
-                        'Origin': "http://www.zhihu.com",
+                        'Origin': "https://www.zhihu.com",
                         'Pragma': "no-cache",
-                        'Referer': "http://www.zhihu.com/"
+                        'Referer': "https://www.zhihu.com/"
                     }
                     r = requests.get(ask_url, headers=headers, verify=False)
 
                     soup = BeautifulSoup(r.content, "lxml")
                     for question in soup.find_all("a", class_="question_link"):
-                        url = "http://www.zhihu.com" + question["href"]
+                        url = "https://www.zhihu.com" + question["href"]
                         title = question.string.encode("utf-8")
                         yield Question(url, title)
 
@@ -926,17 +926,17 @@ class User:
                     headers = {
                         'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                         'Host': "www.zhihu.com",
-                        'Origin': "http://www.zhihu.com",
+                        'Origin': "https://www.zhihu.com",
                         'Pragma': "no-cache",
-                        'Referer': "http://www.zhihu.com/"
+                        'Referer': "https://www.zhihu.com/"
                     }
                     r = requests.get(answer_url, headers=headers, verify=False)
                     soup = BeautifulSoup(r.content, "lxml")
                     for answer in soup.find_all("a", class_="question_link"):
-                        question_url = "http://www.zhihu.com" + answer["href"][0:18]
+                        question_url = "https://www.zhihu.com" + answer["href"][0:18]
                         question_title = answer.string.encode("utf-8")
                         question = Question(question_url, question_title)
-                        yield Answer("http://www.zhihu.com" + answer["href"], question, self)
+                        yield Answer("https://www.zhihu.com" + answer["href"], question, self)
 
     def get_collections(self):
         if self.user_url == None:
@@ -954,15 +954,15 @@ class User:
                     headers = {
                         'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                         'Host': "www.zhihu.com",
-                        'Origin': "http://www.zhihu.com",
+                        'Origin': "https://www.zhihu.com",
                         'Pragma': "no-cache",
-                        'Referer': "http://www.zhihu.com/"
+                        'Referer': "https://www.zhihu.com/"
                     }
                     r = requests.get(collection_url, headers=headers, verify=False)
 
                     soup = BeautifulSoup(r.content, "lxml")
                     for collection in soup.find_all("div", class_="zm-profile-section-item zg-clear"):
-                        url = "http://www.zhihu.com" + \
+                        url = "https://www.zhihu.com" + \
                               collection.find("a", class_="zm-profile-fav-item-title")["href"]
                         name = collection.find("a", class_="zm-profile-fav-item-title").string.encode("utf-8")
                         yield Collection(url, name, self)
@@ -978,9 +978,9 @@ class User:
             headers = {
                 'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                 'Host': "www.zhihu.com",
-                'Origin': "http://www.zhihu.com",
+                'Origin': "https://www.zhihu.com",
                 'Pragma': "no-cache",
-                'Referer': "http://www.zhihu.com/"
+                'Referer': "https://www.zhihu.com/"
             }
             r = requests.get(self.user_url, headers=headers, verify=False)
             soup = BeautifulSoup(r.content, "lxml")
@@ -989,7 +989,7 @@ class User:
             first_item = first_item.find("div", attrs={'class':'zm-profile-section-main zm-profile-section-activity-main zm-profile-activity-page-item-main'})
             if u"赞同了回答" in str(first_item):
                 first_like = first_item.find("a")['href']
-                yield Answer("http://www.zhihu.com" + first_like)
+                yield Answer("https://www.zhihu.com" + first_like)
             # Handle the rest liked items
             post_url = self.user_url + "/activities"
             start_time = soup.find("div", attrs={'class':'zm-profile-section-item zm-item clearfix'})["data-time"]
@@ -1011,7 +1011,7 @@ class User:
                 liked_answers = list(set(all_liked_answers))
                 liked_answers.sort(key=all_liked_answers.index)
                 for i in xrange(len(liked_answers)):
-                    answer_url = "http://www.zhihu.com" + liked_answers[i][54:]
+                    answer_url = "https://www.zhihu.com" + liked_answers[i][54:]
                     yield Answer(answer_url)
                 data_times = re.findall(r"data-time=\"\d+\"", response_html)
                 if len(data_times) != response_size:
@@ -1052,9 +1052,9 @@ class Answer:
         headers = {
             'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
             'Host': "www.zhihu.com",
-            'Origin': "http://www.zhihu.com",
+            'Origin': "https://www.zhihu.com",
             'Pragma': "no-cache",
-            'Referer': "http://www.zhihu.com/"
+            'Referer': "https://www.zhihu.com/"
         }
         r = requests.get(self.answer_url, headers=headers, verify=False)
         soup = BeautifulSoup(r.content, "lxml")
@@ -1068,7 +1068,7 @@ class Answer:
                 self.parser()
             soup = self.soup
             question_link = soup.find("h2", class_="zm-item-title zm-editable-content").a
-            url = "http://www.zhihu.com" + question_link["href"]
+            url = "https://www.zhihu.com" + question_link["href"]
             title = question_link.string.encode("utf-8")
             question = Question(url, title)
             return question
@@ -1086,7 +1086,7 @@ class Answer:
             else:
                 author_tag = soup.find("div", class_="zm-item-answer-author-info").find_all("a")[1]
                 author_id = author_tag.string.encode("utf-8")
-                author_url = "http://www.zhihu.com" + author_tag["href"]
+                author_url = "https://www.zhihu.com" + author_tag["href"]
                 author = User(author_url, author_id)
             return author
 
@@ -1296,7 +1296,7 @@ class Answer:
             self.parser()
         soup = self.soup
         data_aid = soup.find("div", class_="zm-item-answer  zm-item-expanded")["data-aid"]
-        request_url = 'http://www.zhihu.com/node/AnswerFullVoteInfoV2'
+        request_url = 'https://www.zhihu.com/node/AnswerFullVoteInfoV2'
         # if session == None:
         #     create_session()
         # s = session
@@ -1304,9 +1304,9 @@ class Answer:
         headers = {
             'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
             'Host': "www.zhihu.com",
-            'Origin': "http://www.zhihu.com",
+            'Origin': "https://www.zhihu.com",
             'Pragma': "no-cache",
-            'Referer': "http://www.zhihu.com/"
+            'Referer': "https://www.zhihu.com/"
         }
         r = requests.get(request_url, params={"params": "{\"answer_id\":\"%d\"}" % int(data_aid)}, headers=headers, verify=False)
         soup = BeautifulSoup(r.content, "lxml")
@@ -1320,7 +1320,7 @@ class Answer:
                     voter_url = None
                     yield User(voter_url)
                 else:
-                    voter_url = "http://www.zhihu.com" + str(voter_info.a["href"])
+                    voter_url = "https://www.zhihu.com" + str(voter_info.a["href"])
                     voter_id = voter_info.a["title"].encode("utf-8")
                     yield User(voter_url, voter_id)
 
@@ -1332,7 +1332,7 @@ class Collection:
 
     def __init__(self, url, name=None, creator=None):
 
-        #if url[0:len(url) - 8] != "http://www.zhihu.com/collection/":
+        #if url[0:len(url) - 8] != "https://www.zhihu.com/collection/":
         if not re.compile(r"(http|https)://www.zhihu.com/collection/\d{8}").match(url):
             raise ValueError("\"" + url + "\"" + " : it isn't a collection url.")
         else:
@@ -1346,9 +1346,9 @@ class Collection:
         headers = {
             'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
             'Host': "www.zhihu.com",
-            'Origin': "http://www.zhihu.com",
+            'Origin': "https://www.zhihu.com",
             'Pragma': "no-cache",
-            'Referer': "http://www.zhihu.com/"
+            'Referer': "https://www.zhihu.com/"
         }
         r = requests.get(self.url, headers=headers, verify=False)
         soup = BeautifulSoup(r.content, "lxml")
@@ -1377,7 +1377,7 @@ class Collection:
                 self.parser()
             soup = self.soup
             creator_id = soup.find("h2", class_="zm-list-content-title").a.string.encode("utf-8")
-            creator_url = "http://www.zhihu.com" + soup.find("h2", class_="zm-list-content-title").a["href"]
+            creator_url = "https://www.zhihu.com" + soup.find("h2", class_="zm-list-content-title").a["href"]
             creator = User(creator_url, creator_id)
             self.creator = creator
             return creator
@@ -1398,10 +1398,10 @@ class Collection:
                 if not answer.find("p", class_="note"):
                     question_link = answer.find("h2")
                     if question_link != None:
-                        question_url = "http://www.zhihu.com" + question_link.a["href"]
+                        question_url = "https://www.zhihu.com" + question_link.a["href"]
                         question_title = question_link.a.string.encode("utf-8")
                     question = Question(question_url, question_title)
-                    answer_url = "http://www.zhihu.com" + answer.find("span", class_="answer-date-link-wrap").a["href"]
+                    answer_url = "https://www.zhihu.com" + answer.find("span", class_="answer-date-link-wrap").a["href"]
                     author = None
 
                     if answer.find("div", class_="zm-item-answer-author-info").get_text(strip='\n') == u"匿名用户":
@@ -1410,7 +1410,7 @@ class Collection:
                     else:
                         author_tag = answer.find("div", class_="zm-item-answer-author-info").find_all("a")[0]
                         author_id = author_tag.string.encode("utf-8")
-                        author_url = "http://www.zhihu.com" + author_tag["href"]
+                        author_url = "https://www.zhihu.com" + author_tag["href"]
                         author = User(author_url, author_id)
                     yield Answer(answer_url, question, author)
             i = 2
@@ -1418,9 +1418,9 @@ class Collection:
                 headers = {
                     'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36",
                     'Host': "www.zhihu.com",
-                    'Origin': "http://www.zhihu.com",
+                    'Origin': "https://www.zhihu.com",
                     'Pragma': "no-cache",
-                    'Referer': "http://www.zhihu.com/"
+                    'Referer': "https://www.zhihu.com/"
                 }
                 r = requests.get(self.url + "?page=" + str(i), headers=headers, verify=False)
                 answer_soup = BeautifulSoup(r.content, "lxml")
@@ -1432,10 +1432,10 @@ class Collection:
                         if not answer.find("p", class_="note"):
                             question_link = answer.find("h2")
                             if question_link != None:
-                                question_url = "http://www.zhihu.com" + question_link.a["href"]
+                                question_url = "https://www.zhihu.com" + question_link.a["href"]
                                 question_title = question_link.a.string.encode("utf-8")
                             question = Question(question_url, question_title)
-                            answer_url = "http://www.zhihu.com" + answer.find("span", class_="answer-date-link-wrap").a[
+                            answer_url = "https://www.zhihu.com" + answer.find("span", class_="answer-date-link-wrap").a[
                                 "href"]
                             author = None
                             if answer.find("div", class_="zm-item-answer-author-info").get_text(strip='\n') == u"匿名用户":
@@ -1445,7 +1445,7 @@ class Collection:
                             else:
                                 author_tag = answer.find("div", class_="zm-item-answer-author-info").find_all("a")[0]
                                 author_id = author_tag.string.encode("utf-8")
-                                author_url = "http://www.zhihu.com" + author_tag["href"]
+                                author_url = "https://www.zhihu.com" + author_tag["href"]
                                 author = User(author_url, author_id)
                             yield Answer(answer_url, question, author)
                 i = i + 1

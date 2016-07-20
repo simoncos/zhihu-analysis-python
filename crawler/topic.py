@@ -23,6 +23,7 @@ processNum = 12
 prefix_question = "https://www.zhihu.com/question/"
 
 def crawlTopic(queue, equeue):
+    # TODO: fix - no topic wirtten for many questions
     pname = mp.current_process().name
     fh_topic = open('data/topic/topic_' + pname, 'w')
     emptyCnt = 0
@@ -43,7 +44,7 @@ def crawlTopic(queue, equeue):
         otherErrCnt, flagbreak = 0, False
         while True:
             try:
-                qtopic = QuestionTopic(task)
+                qtopic = QuestionTopic(task) # get topics
                 break
             except requests.ConnectionError as inst:# 404 not handled correctly...
                 print ("%s: " % pname) + repr(inst)

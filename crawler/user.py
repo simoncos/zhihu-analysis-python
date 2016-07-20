@@ -137,6 +137,7 @@ def crawlUserInfo(queue, flag, vset, equeue):
                 otherErrCnt = 0
                 continue
             except: # try 5 times, if all failed, add to error queue and move on...
+            # TODO: people | org
                 print "%s: other error when processing user %s" % (pname, task.user_uuid) + str(sys.exc_info()) + '\n'
                 otherErrCnt += 1
                 if otherErrCnt < 5:
