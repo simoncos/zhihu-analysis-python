@@ -520,14 +520,11 @@ class User:
     soup = None
 
     def __init__(self, user_url, user_id=None):
-        if user_url == None:
-            self.user_id = "匿名用户"
-        elif user_url.startswith('www.zhihu.com/people', user_url.index('//') + 2) == False:
+        if user_url.startswith('www.zhihu.com/people', user_url.index('//') + 2) == False and user_url.startswith('www.zhihu.com/org', user_url.index('//') + 2) == False:
             raise ValueError("\"" + user_url + "\"" + " : it isn't a user url.")
         else:
             self.user_url = user_url
-            if user_id != None:
-                self.user_id = user_id
+            self.user_id = user_id if user_id != None else "匿名用户"
 
     def parser(self):
         headers = {
