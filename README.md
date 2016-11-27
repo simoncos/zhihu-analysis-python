@@ -6,13 +6,6 @@
 
 注：[本项目所使用的zhihu-python](https://github.com/simoncos/zhihu-analysis-python/tree/master/crawler)已与原版存在差异
 
-## 文件说明
-
-- `crawler`文件夹：爬虫部分，以广度优先策略爬取知乎数据，并以csv格式储存（这一部分代码目前版本有误，爬到的数据文件与`zhihu_database.py`无法衔接，此外存在topic爬漏的问题，待修复）
-- `zhihu_schema.sql`：SQLite数据库的schema
-- `zhihu_database.py`：将csv中的数据导入至数据库中
-- `zhihu_analysis.py`：从数据库中提取数据并进行分析
-
 ## 详细内容
 
 - [Dataset](http://pan.baidu.com/s/1bos5RqR)
@@ -21,3 +14,16 @@
 	- [知乎社交网络分析（下）：关注网络](http://www.jianshu.com/p/3b2a1895a12d)
 - English
 	- [Project Report](https://github.com/simoncos/zhihu-analysis-python/tree/master/analysis-report)
+
+## 文件说明
+
+- `crawler`文件夹：爬虫部分，以广度优先策略爬取知乎数据，并以csv格式储存（这一部分代码目前版本有误，爬到的数据文件与`zhihu_database.py`无法衔接，此外存在topic爬漏的问题，待修复）
+- `zhihu_schema.sql`：SQLite数据库的schema
+- `zhihu_database.py`：将csv中的数据导入至数据库中
+- `zhihu_analysis.py`：从数据库中提取数据并进行分析
+
+## 爬虫部分已知问题及（可能）原因
+
+- InsecureRequestWarning | urlib
+- ValueError('"https://www.zhihu.com/org/ai-fan-er-85" : it isn\'t a user url.',)  | 知乎的可关注对象新增了org，目前不能识别
+- topic.py 会爬漏话题标签 | 原因未知

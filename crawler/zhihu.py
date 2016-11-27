@@ -558,7 +558,7 @@ class User:
                 if self.soup == None:
                     self.parser()
                 soup = self.soup
-                user_id = soup.find("div", class_="title-section ellipsis") \
+                user_id = soup.find("div", class_="title-section") \
                     .find("span", class_="name").string.encode("utf-8")
                 self.user_id = user_id
                 if platform.system() == 'Windows':
