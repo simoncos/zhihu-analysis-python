@@ -25,5 +25,4 @@
 ## 爬虫部分已知问题及（可能）原因
 
 - InsecureRequestWarning | urlib
-- ValueError('"https://www.zhihu.com/org/ai-fan-er-85" : it isn\'t a user url.',)  | 知乎的可关注对象新增了org，目前不能识别
 - topic.py 会爬漏话题标签 | 原因未知
