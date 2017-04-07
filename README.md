@@ -26,6 +26,9 @@
 
 **爬虫部分已年久失修，由于这个project的重点不在于爬虫，所以不打算更新了，还请谨慎入坑:)**
 
-- InsecureRequestWarning | urlib
+- zhihu-python InsecureRequestWarning | urlib
 - topic.py 会爬漏话题标签 | 原因未知
-- 无法区分 org 与 user
+
+## 未来计划
+
+之后考虑利用已有数据集再做一些分析，比如用户聚类、用户-话题-问题网络之类。
