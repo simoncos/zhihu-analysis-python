@@ -1,7 +1,23 @@
-# 执行计划：严谨幂律重访 + 社交/兴趣社区对齐
+# 执行计划：数据集发布与论文 → 严谨幂律重访 → 社交/兴趣社区对齐
 
 > 承接 RESEARCH_ROADMAP.md 中的方向 A（项目一）与 B（项目二）。
 > 两个项目共用 Phase 0 的地基，项目一是项目二的热身。
+>
+> **2026-07 调整：新增"项目零：数据集正式发布 + 数据集论文"，优先级最高。**
+> 理由：使用情况调查显示数据集十年传播无归属（见 docs/RESEARCH_REVIEW.md §6.1）；
+> 项目一的全部产出（严谨拟合 + 偏差分析）可以直接作为数据集论文的
+> characterization 章节，两者合并为一篇 dataset paper 性价比最高。
+
+## 项目零：数据集发布 + 数据集论文（就绪度：除真实数据外全部完成）
+
+- 发布流水线：`analysis/release.py`（匿名化：用户/问题 ID 随机整数化、
+  删除显示名；映射表本地保留不发布）——已实现并经合成数据验证；
+- 文档三件套：`release/DATASHEET.md`（Gebru 框架）、`release/DATASET_CARD.md`
+  （HF 数据卡）、`release/PUBLISHING.md`（Zenodo+HF 操作手册与发布前检查清单）；
+- 论文草稿：`paper/zhihu2015_dataset_paper.md`（目标 ICWSM dataset track；
+  §7 采样偏差分析已定稿，§4/§6 待真实数据回填）；
+- 数据到位后的收尾顺序：`release.py` 出 stats → 回填 [TODO] → 跑
+  `run_all.py` 出 §6 拟合表与图 → 发布前检查清单 → Zenodo/HF → 投稿。
 
 ## Phase 0：数据与环境地基（预计 1~2 天）
 

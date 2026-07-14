@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 *.db
 results/parquet/
+release_build/
