@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+*.db
+results/parquet/
