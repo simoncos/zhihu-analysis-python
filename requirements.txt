@@ -1,0 +1,8 @@
+pandas>=2.0
+pyarrow
+python-igraph>=0.11
+powerlaw>=1.5
+matplotlib
+scipy
+tabulate
+leidenalg

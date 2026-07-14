@@ -32,3 +32,24 @@
 ## 未来计划
 
 之后考虑利用已有数据集再做一些分析，比如用户聚类、用户-话题-问题网络之类。
+
+研究方向调研与执行计划见 [`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md) 与 [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)。
+
+## 新版分析流水线（2026，Python 3）
+
+`analysis/` 包实现了 Phase 0（数据体检）+ 项目一（严谨幂律检验、BFS 采样偏差模拟）：
+
+```bash
+pip install -r requirements.txt
+
+# 完整流水线（需要 zhihu.db 放在仓库根目录）
+python -m analysis.run_all --db zhihu.db --out results
+
+# 采样偏差模拟（不需要真实数据）
+python -m analysis.run_all --bfs-bias --out results
+
+# 无数据时用合成数据库做冒烟测试
+python -m analysis.run_all --synth --out /tmp/smoke --gof-sims 20
+```
+
+输出：`results/health_check.md`（数据体检）、`results/powerlaw_results.md`（CSN 幂律拟合 + 与对数正态等备择分布的似然比检验）、`results/figures/`（各特征 CCDF 图）、`results/bfs_bias_simulation.md`（采样偏差实验）。
