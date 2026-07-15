@@ -141,18 +141,21 @@ Vuong likelihood-ratio tests.
 
 **Headline: none of the seven distributions is a pure power law.**
 
-| series | α | x_min | n_tail | vs lognormal (R, p) | vs trunc. PL (R, p) | verdict |
-|---|---|---|---|---|---|---|
-| followees | 2.63 | 550 | 1,587 | −0.83, .41 | −0.96, .079 | trunc. PL (marginal) |
-| followers | 2.58 | 75,863 | 268 | −1.29, .20 | −1.95, **.010** | trunc. PL |
-| answers | 2.28 | 137 | 2,938 | −4.36, **<.001** | −4.53, **<.001** | lognormal |
-| agrees | 2.36 | 35,086 | 598 | −2.08, **.037** | −2.37, **<.001** | lognormal |
-| thanks | 2.43 | 8,819 | 536 | −2.11, **.035** | −2.40, **<.001** | lognormal |
-| induced in-deg | 2.16 | 311 | 2,049 | −5.35, **<.001** | −6.51, **<.001** | lognormal |
-| induced out-deg | 2.87 | 403 | 1,546 | −2.39, **.017** | −2.44, **<.001** | lognormal |
+| series | α | x_min | n_tail | GOF p | vs lognormal (R, p) | vs trunc. PL (R, p) | verdict |
+|---|---|---|---|---|---|---|---|
+| followees | 2.63 | 550 | 1,587 | .55 | −0.83, .41 | −0.96, .079 | PL plausible; trunc. PL marginally preferred |
+| followers | 2.58 | 75,863 | 268 | .08 | −1.29, .20 | −1.95, **.010** | GOF rejected; trunc. PL |
+| answers | 2.28 | 137 | 2,938 | **<.01** | −4.36, **<.001** | −4.53, **<.001** | GOF rejected; lognormal |
+| agrees | 2.36 | 35,086 | 598 | **.05** | −2.08, **.037** | −2.37, **<.001** | GOF rejected; lognormal |
+| thanks | 2.43 | 8,819 | 536 | **<.01** | −2.11, **.035** | −2.40, **<.001** | GOF rejected; lognormal |
+| induced in-deg | 2.16 | 311 | 2,049 | **<.01** | −5.35, **<.001** | −6.51, **<.001** | GOF rejected; lognormal |
+| induced out-deg | 2.87 | 403 | 1,546 | **<.01** | −2.39, **.017** | −2.44, **<.001** | GOF rejected; lognormal |
 
-(R < 0 means the alternative fits better; exponential loses everywhere.
-[TODO: add bootstrap GOF p-values from the full run.])
+(GOF p from 100-replicate CSN semi-parametric bootstrap: p < 0.1 rejects
+the power-law hypothesis outright. R < 0 means the alternative fits
+better; exponential loses everywhere. Six of seven series fail GOF; the
+one that passes — followee counts — still marginally prefers a truncated
+power law.)
 
 The original 2015 report concluded from log-log scatter plots that all
 five profile counts "show a significant power law". Under
