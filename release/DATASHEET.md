@@ -17,21 +17,27 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
 ## Composition
 
 - **Instances.** Five tables (Parquet):
-  - `users`: [TODO ~26,161] crawled users × 5 profile counts
+  - `users`: 26,161 crawled users × 5 profile counts
     (followee/follower/answer/agree/thanks) + BFS layer;
-  - `edges`: [TODO ~4.6M] directed follow edges (src follows dst),
-    including edges to ~[TODO] referenced-but-not-crawled users;
-  - `questions`: [TODO ~2.2M] question → topic tag pairs;
-  - `user_questions`: [TODO ~1.7M] who answered which question;
-  - `user_topics`: [TODO ~5.4M] user → topic rows (duplicates = counts).
+  - `edges`: 4,612,110 directed follow edges (src follows dst), of which
+    3,132,527 (67.9%) connect two crawled users (the fully-observed
+    induced subgraph); 433,041 additional accounts appear as
+    referenced-but-not-crawled endpoints (459,202 distinct ids in total);
+  - `questions`: 2,245,143 question → topic tag pairs;
+  - `user_questions`: 1,655,411 who-answered-which-question pairs;
+  - `user_topics`: 5,414,129 user → topic rows (duplicates = counts),
+    46,647 distinct topic tags.
 - **Sampling.** NOT a random sample: 2-layer BFS (out-links/followees) from
   a single seed user. The induced subgraph among crawled users is completely
   observed; everything else is partially observed. Known biases are
   quantified in the accompanying paper (BFS oversamples high-degree users;
   simulation shows the fitted in-degree exponent is underestimated by ~0.6).
-- **Known quality issues.** A crawler bug caused some question→topic tags to
-  be missed; coverage is quantified in the paper ([TODO %]). Counts are
-  point-in-time profile values, not aggregates of the crawled content.
+- **Known quality issues.** A crawler bug caused some question→topic tags
+  to be missed: 99.3% of answered-question ids resolve to a topic; at user
+  level 18.2% of users with answers lack topic rows. No duplicate users,
+  duplicate edges, or self-loops. Counts are point-in-time profile values,
+  not aggregates of the crawled content. BFS layers: 1 seed / 146 layer-1
+  / 26,014 layer-2 users.
 
 ## Collection Process
 
@@ -69,10 +75,14 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
 
 - All collected fields were public at crawl time; the release removes
   usernames and URL slugs and pseudonymizes question ids.
-- Residual risk: users with extreme, publicly known profile counts
-  (e.g. a specific follower count in Dec 2015) could in principle be
-  re-identified from count signatures; we judge this low-risk because the
-  counts are 10+ years stale, but we document it explicitly.
+- Residual risk (checked, not hypothetical): accounts at the extreme top
+  of the count distributions ARE identifiable by count signature — e.g.
+  the maximum follower count (921,940) corresponds to the publicly known
+  most-followed Zhihu account of late 2015. We assess this as acceptable:
+  those are public figures, the exposed fields are aggregate counts that
+  were publicly displayed on their profiles at the time, and no content or
+  username is included. For non-celebrity accounts the 10-year staleness
+  of the counts makes signature matching impractical.
 - Takedown: contact the maintainer to have a specific pseudonymized record
   removed in a new version.
 

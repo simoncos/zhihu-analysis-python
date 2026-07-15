@@ -28,11 +28,11 @@ follow network). This period of Zhihu can no longer be re-crawled.
 
 | file | rows | schema |
 |---|---|---|
-| `users.parquet` | ~26K | `uid, followee_num, follower_num, answer_num, agree_num, thanks_num, layer` |
-| `edges.parquet` | ~4.6M | `src, dst` (directed: src follows dst) |
-| `questions.parquet` | ~2.2M | `qid, topic` |
-| `user_questions.parquet` | ~1.7M | `uid, qid` |
-| `user_topics.parquet` | ~5.4M | `uid, topic` (duplicate rows carry activity counts) |
+| `users.parquet` | 26,161 | `uid, followee_num, follower_num, answer_num, agree_num, thanks_num, layer` |
+| `edges.parquet` | 4,612,110 | `src, dst` (directed: src follows dst; 3,132,527 edges lie inside the crawled set) |
+| `questions.parquet` | 2,245,143 | `qid, topic` |
+| `user_questions.parquet` | 1,655,411 | `uid, qid` |
+| `user_topics.parquet` | 5,414,129 | `uid, topic` (duplicate rows carry activity counts; 46,647 distinct tags) |
 
 `uid`/`qid` are random integers (see Privacy). Topic tags are original
 Chinese strings. Exact row counts in `stats.json`.
@@ -43,8 +43,8 @@ Chinese strings. Exact row counts in `stats.json`.
    sample of Zhihu. Only the subgraph induced on the ~26K crawled users is
    completely observed. BFS oversamples high-degree users; see the paper's
    bias analysis before fitting distributions.
-2. **Known gaps.** Some question→topic tags were missed by the 2015
-   crawler (coverage quantified in the paper).
+2. **Known gaps.** 99.3% of answered questions have topic tags, but 18.2%
+   of answering users lack `user_topics` rows (2015 crawler gap).
 3. **Vintage.** All values are as of December 2015.
 
 ## Quick start

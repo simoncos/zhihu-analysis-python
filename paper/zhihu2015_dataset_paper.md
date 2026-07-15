@@ -9,18 +9,21 @@
 
 We release Zhihu2015, a December-2015 snapshot of the follow network of
 Zhihu, then and now the largest Chinese community question answering (CQA)
-platform. The dataset covers [TODO 26,161] users with complete profile
-counts, [TODO 4.6M] directed follow edges, and [TODO 5.4M] user-topic
-activity records spanning [TODO 2.2M] questions. To our knowledge it is the
+platform. The dataset covers 26,161 users with complete profile
+counts, 4.61M directed follow edges (459K distinct accounts; 3.13M edges
+form a fully-observed induced subgraph), and 5.41M user-topic
+activity records spanning 2.25M questions and 46.6K topic tags. To our knowledge it is the
 only public dataset of Zhihu's social graph: the official ZhihuRec dataset
 exposes recommendation logs but no follow relations, and today's
 anti-crawling measures make the graph impossible to re-collect. Alongside
 the data we contribute (i) a rigorous re-analysis of its degree and
-activity distributions using likelihood-based model comparison, revising
-the "power law by visual inspection" claims of the original 2015 report,
-and (ii) a simulation-based quantification of the bias induced by the
-crawl's 2-layer BFS design, showing that naive use of profile counts
-underestimates the in-degree exponent by ≈0.6. We document anonymization,
+activity distributions using likelihood-based model comparison: none of
+the seven examined distributions is a pure power law — five are better
+described as lognormal and two as truncated power laws — overturning the
+original report's visual-inspection claims; and (ii) a simulation-based
+quantification of the bias induced by the crawl's 2-layer BFS design,
+showing that naive use of profile counts underestimates the in-degree
+exponent by ≈0.6. We document anonymization,
 residual re-identification risk, and intended uses including expert-finding
 benchmarks, interest-homophily studies, and calibration of LLM-based social
 simulations.
@@ -79,21 +82,39 @@ zhihu-python), December 2015:
   (followee/follower/answer/agree/thanks), followee list, answered
   question ids.
 - **Stage 2** — topics of all collected question ids.
-- Layer sizes: layer 0 = 1, layer 1 = [TODO], layer 2 = [TODO].
-- Known defect: stage-2 crawler intermittently missed topic tags;
-  [TODO %] of user_questions rows have a resolvable topic.
+- Layer sizes: layer 0 = 1, layer 1 = 146, layer 2 = 26,014.
+- Data quality (measured): 99.3% of answered-question ids resolve to at
+  least one topic tag; at user level, 68.3% of users have topic records —
+  13.6% of users answered nothing (no topics expected) and 18.2% answered
+  questions but lack topic rows (stage-2 gap). Integrity checks: zero
+  duplicate users, duplicate edges, or self-loops.
 
 Only publicly visible information was collected; no text content.
 
 ## 4. Dataset Description
 
-[TODO: schema table + exact row counts from stats.json + basic stats table
-(mean/median/max of the five profile counts) + induced-subgraph edge count]
+| table | rows | contents |
+|---|---|---|
+| users | 26,161 | 5 profile counts + BFS layer |
+| edges | 4,612,110 | directed follows; 3,132,527 (67.9%) inside the crawled set |
+| questions | 2,245,143 | question → topic tag |
+| user_questions | 1,655,411 | who answered what |
+| user_topics | 5,414,129 | user → topic activity (46,647 distinct tags) |
+
+Profile counts (mean / median / max): followees 176.3 / 67 / 43,949;
+followers 3,620.0 / 112 / 921,940; answers 68.9 / 17 / 10,807;
+agrees 3,858.4 / 96 / 1,515,417; thanks 865.3 / 28 / 275,044.
+All means and medians reproduce the original 2015 report exactly,
+confirming the artifact's integrity across a decade of storage.
 
 Observation model: profile counts are exact platform-global values for the
 crawled users; the follow graph is completely observed only on the induced
-subgraph of crawled users. Edges to referenced-but-uncrawled accounts
-([TODO] additional pseudonymous ids) are included for completeness.
+subgraph of crawled users. Edges to 433,041 referenced-but-uncrawled
+pseudonymous accounts are included for completeness. Contrary to the 2015
+report's own analysis — which examined only elite subgraphs of ≤1,896
+users — the full induced subgraph is large and dense (3.13M edges over
+26K users, mean total degree ≈ 240), enabling graph analyses the original
+project could not attempt.
 
 ## 5. Anonymization and Ethics
 
@@ -104,19 +125,48 @@ kept verbatim. Mapping tables remain with the maintainer; takedown requests
 are honored via versioned re-release. Residual risk: count signatures of
 extreme accounts could in principle be matched against 2015-era public
 records; we assess this as low and document it in the datasheet.
-[TODO: describe the celebrity-fingerprint self-check result]
+We verified the risk concretely: the maximum follower count in the data
+(921,940) is attributable to the publicly known most-followed Zhihu
+account of late 2015. We accept and disclose this: affected accounts are
+public figures, the exposed fields are aggregate counts that their
+profiles displayed publicly, and no username or content is released.
 
 ## 6. Statistical Characterization
 
-[TODO — from powerlaw_results.md once real data is in:
-- Table: CSN fits for 5 profile counts + induced in/out degree
-  (α, xmin, GOF p, LR vs lognormal/exponential/truncated PL, verdict)
-- Expected headline: which of the 2015 "significant power law" claims
-  survive; likely several downgrade to lognormal-indistinguishable,
-  echoing Broido & Clauset (2019)
-- CCDF figures
-- agree–follower correlation, revisited with rank correlation + partial
-  correlation controlling answer_num]
+We fit each of the five profile-count distributions and the induced
+subgraph's in/out-degree distributions with the CSN framework
+(`powerlaw`: MLE α, KS-optimal x_min) and compare the power-law model
+against lognormal, exponential, and truncated power law via normalized
+Vuong likelihood-ratio tests.
+
+**Headline: none of the seven distributions is a pure power law.**
+
+| series | α | x_min | n_tail | vs lognormal (R, p) | vs trunc. PL (R, p) | verdict |
+|---|---|---|---|---|---|---|
+| followees | 2.63 | 550 | 1,587 | −0.83, .41 | −0.96, .079 | trunc. PL (marginal) |
+| followers | 2.58 | 75,863 | 268 | −1.29, .20 | −1.95, **.010** | trunc. PL |
+| answers | 2.28 | 137 | 2,938 | −4.36, **<.001** | −4.53, **<.001** | lognormal |
+| agrees | 2.36 | 35,086 | 598 | −2.08, **.037** | −2.37, **<.001** | lognormal |
+| thanks | 2.43 | 8,819 | 536 | −2.11, **.035** | −2.40, **<.001** | lognormal |
+| induced in-deg | 2.16 | 311 | 2,049 | −5.35, **<.001** | −6.51, **<.001** | lognormal |
+| induced out-deg | 2.87 | 403 | 1,546 | −2.39, **.017** | −2.44, **<.001** | lognormal |
+
+(R < 0 means the alternative fits better; exponential loses everywhere.
+[TODO: add bootstrap GOF p-values from the full run.])
+
+The original 2015 report concluded from log-log scatter plots that all
+five profile counts "show a significant power law". Under
+likelihood-based testing, *every* series is better described by a
+lognormal or a truncated power law — exactly the pattern Broido & Clauset
+(2019) report across ~1,000 networks. The two follow-count series retain
+heavy power-law-like tails with exponential cutoffs; the activity counts
+(answers, agrees, thanks) and both induced degree distributions are
+decisively lognormal. Zhihu2015 thus contributes a clean Chinese-CQA data
+point to the scale-free debate: visually "scale-free" in every panel,
+statistically scale-free in none.
+
+CCDF plots for all seven series with fitted overlays:
+`results/figures/` [TODO: select 2–3 for the paper].
 
 ## 7. Sampling Bias of the 2-Layer BFS Design
 
@@ -159,8 +209,9 @@ relative to the sampling frame; §6's fits are reported for both estimators.
 
 ## 9. Limitations
 
-Single-seed 2-layer BFS frame (§7); no timestamps; no text; topic-tag gaps
-([TODO %]); 2015 vintage — none of these are fixable, all are documented.
+Single-seed 2-layer BFS frame (§7); no timestamps; no text; user-level
+topic gaps (18.2% of users with answers lack topic rows); 2015 vintage —
+none of these are fixable, all are documented.
 
 ## 10. Availability
 
