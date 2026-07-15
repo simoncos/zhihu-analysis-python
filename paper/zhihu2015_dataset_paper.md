@@ -13,9 +13,10 @@ platform. The dataset covers 26,161 users with complete profile
 counts, 4.61M directed follow edges (459K distinct accounts; 3.13M edges
 form a fully-observed induced subgraph), and 5.41M user-topic
 activity records spanning 2.25M questions and 46.6K topic tags. To our knowledge it is the
-only public dataset of Zhihu's social graph: the official ZhihuRec dataset
-exposes recommendation logs but no follow relations, and today's
-anti-crawling measures make the graph impossible to re-collect. Alongside
+largest and most fully documented public snapshot of Zhihu's social graph:
+the official ZhihuRec dataset exposes recommendation logs but no follow
+relations, prior graph releases are two orders of magnitude smaller, and
+today's anti-crawling measures make the graph impossible to re-collect. Alongside
 the data we contribute (i) a rigorous re-analysis of its degree and
 activity distributions using likelihood-based model comparison: none of
 the seven examined distributions is a pure power law — five are better
@@ -66,12 +67,24 @@ Contributions:
   behavioral vs structural.
 - **Zhihu expert-identification pairs** (Xu et al. 2017): 1.2M QA pairs for
   supervised expert finding; no graph.
+- **The CANE/CENE "Zhihu" benchmark** (Sun et al. 2016; Tu et al. 2017):
+  a 10K-user follow-edge dataset with topic-description texts, widely
+  reused in textual network embedding papers. It is the closest existing
+  release; Zhihu2015 differs in scale (26K fully-profiled users, 459K
+  referenced accounts, 4.6M edges vs ~44K), in carrying complete profile
+  counts, BFS-layer provenance and the question/topic bipartite layer,
+  and in documented collection methodology and bias analysis.
+- **Event-scoped Zhihu data**: a multimodal dataset around a single viral
+  event (Goldbach-conjecture claim; Fu et al. 2021) — temporal but not a
+  platform-scale graph snapshot.
 - **Other CQA graphs**: Stack Exchange dumps (interaction, not follow,
   graphs); Quora has no public graph data. Historical follow-graph
   snapshots exist for Twitter (Kwak et al. 2010) and have proven durably
   valuable; Zhihu2015 plays that role for the Chinese knowledge community.
 
-[TODO: 补充近年是否出现其他知乎结构数据集的最终核查]
+Positioning: to our knowledge Zhihu2015 is the largest and most fully
+documented public snapshot of Zhihu's follow network, and the only one
+that couples the social graph with question/topic activity at this scale.
 
 ## 3. Collection Methodology (2015)
 
@@ -82,7 +95,9 @@ zhihu-python), December 2015:
   (followee/follower/answer/agree/thanks), followee list, answered
   question ids.
 - **Stage 2** — topics of all collected question ids.
-- Layer sizes: layer 0 = 1, layer 1 = 146, layer 2 = 26,014.
+- Layer sizes: layer 0 = 1, layer 1 = 146, layer 2 = 26,014. (The seed's
+  profile listed 149 followees; 3 accounts were deleted or failed to crawl
+  — a measured example of the crawl's small losses.)
 - Data quality (measured): 99.3% of answered-question ids resolve to at
   least one topic tag; at user level, 68.3% of users have topic records —
   13.6% of users answered nothing (no topics expected) and 18.2% answered
@@ -171,6 +186,46 @@ statistically scale-free in none.
 CCDF plots for all seven series with fitted overlays:
 `results/figures/` [TODO: select 2–3 for the paper].
 
+### 6.2 Structure of the induced follow graph
+
+The fully-observed induced subgraph (26,161 nodes, 3.13M edges) is a
+single weak component containing a giant strongly connected component of
+25,635 nodes (98.0%; 524 SCCs in total). Sampled average shortest path
+length inside the giant SCC is 2.62 (500 sources) — an ultra-small world,
+consistent with (and now generalizing) the 2015 report's elite-subgraph
+values of 2.11/1.85, which we can attribute to the sampling frame rather
+than to elite status alone. Density is 4.6×10⁻³; global clustering
+(undirected) 0.079; degree assortativity −0.186 (disassortative, typical
+of follow networks). Reciprocity is 14.4% — notably lower than the 22.1%
+reported for Twitter's early follow graph (Kwak et al. 2010), consistent
+with Zhihu's follow relation acting as an interest subscription rather
+than a social tie.
+
+### 6.3 The topic layer
+
+17,861 crawled users (68.3%) have topic records (plus 53 orphan ids with
+topics but no profile row — a documented crawl artifact); the median such
+user spans 71 distinct topics (mean 150.5). Tag usage is highly concentrated: the top
+1% of the 46,647 tags account for 54.5% of all 5.41M rows. The
+full-population top tags (调查类问题, 生活, 心理学, 恋爱, 互联网, 情感,
+电影, 历史, …) largely reproduce the 2015 report's list — which was
+computed only over a 220-user dominating set — indicating that the old
+shortcut introduced little distortion at the top of the ranking, while
+the full table now provides calibrated counts at every rank.
+
+### 6.4 A demonstration: topic homophily of the follow relation
+
+As a minimal validation that the two layers of the dataset interact
+meaningfully, we compare topic-set Jaccard similarity across 100K sampled
+follow edges (both endpoints crawled, both with topic records) against
+100K random such pairs: 0.0528 vs 0.0288 — followed pairs are 1.83× more
+topically similar, and 95.4% of them share at least one topic (vs 78.7%
+of random pairs; all differences are far beyond sampling noise at these
+sample sizes). The follow graph is thus measurably, but far from
+deterministically, aligned with the interest layer — quantifying this
+alignment at community level is a natural research use of the dataset
+(§8).
+
 ## 7. Sampling Bias of the 2-Layer BFS Design
 
 (Final numbers; independent of the real data.)
@@ -216,7 +271,31 @@ Single-seed 2-layer BFS frame (§7); no timestamps; no text; user-level
 topic gaps (18.2% of users with answers lack topic rows); 2015 vintage —
 none of these are fixable, all are documented.
 
-## 10. Availability
+## 10. Ethics Statement
+
+The data was collected in 2015 by student researchers for coursework,
+before Zhihu offered an API, by scraping profile pages that were publicly
+visible to any logged-in user; no private messages, drafts, or restricted
+content were accessed, and no text content was retained. The collection
+predates and was not subject to institutional IRB review; the present
+*release* is where the ethical decisions lie, and we make them explicit:
+(i) no usernames, URLs, or content are released; (ii) user and question
+identifiers are pseudonymized (question ids specifically because public
+answerer lists would otherwise re-identify users); (iii) re-identification
+risk is measured rather than assumed away — 92.4% of users carry a unique
+profile-count signature, which defeats casual identification only, and we
+disclose that an adversary holding independent 2015 auxiliary data gains
+nothing new from this release (§5); (iv) counts are not perturbed, a
+deliberate utility/privacy trade-off we justify by the data's 10-year
+staleness and its distributional payload (§6); (v) a takedown channel is
+provided via versioned re-release. Automated collection was against the
+letter of Zhihu's terms of service, as it is for essentially all
+independent social-media research corpora of that era; we believe the
+scientific value of preserving an unreproducible snapshot, combined with
+the minimization above, justifies publication, and we welcome the
+community's scrutiny of that judgement.
+
+## 11. Availability
 
 Zenodo DOI [TODO] (canonical, versioned) · Hugging Face `simoncos/zhihu2015`
 (mirror) · code: github.com/simoncos/zhihu-analysis-python (analysis +
@@ -224,7 +303,41 @@ release pipeline, MIT). License CC BY 4.0.
 
 ## References
 
-[TODO: Broido & Clauset 2019; Kurant et al. 2010; Gjoka et al. 2010;
-Clauset, Shalizi & Newman 2009; Alstott et al. 2014 (powerlaw); ZhihuRec
-(Hao et al. 2021); Xu et al. 2017; Kwak et al. 2010; Gebru et al. 2021
-(datasheets); survey Yuan et al. 2018 (expert rec in CQA)]
+- Alstott, J., Bullmore, E., & Plenz, D. (2014). powerlaw: A Python
+  package for analysis of heavy-tailed distributions. *PLoS ONE*, 9(1).
+- Broido, A. D., & Clauset, A. (2019). Scale-free networks are rare.
+  *Nature Communications*, 10, 1017.
+- Clauset, A., Shalizi, C. R., & Newman, M. E. J. (2009). Power-law
+  distributions in empirical data. *SIAM Review*, 51(4), 661–703.
+- Fu, S., et al. (2021). Multimodal social network dataset based on the
+  Goldbach-conjecture-proved event in Zhihu. (Dataset descriptor.)
+- Gebru, T., Morgenstern, J., Vecchione, B., Vaughan, J. W., Wallach, H.,
+  Daumé III, H., & Crawford, K. (2021). Datasheets for datasets.
+  *Communications of the ACM*, 64(12), 86–92.
+- Gjoka, M., Kurant, M., Butts, C. T., & Markopoulou, A. (2010). Walking
+  in Facebook: A case study of unbiased sampling of OSNs. *INFOCOM*.
+- Hao, B., et al. (2021). A large-scale rich context query and
+  recommendation dataset in online knowledge-sharing (ZhihuRec).
+  arXiv:2106.06467.
+- Kurant, M., Markopoulou, A., & Thiran, P. (2010). On the bias of BFS.
+  *ITC 22* / arXiv:1004.1729.
+- Kwak, H., Lee, C., Park, H., & Moon, S. (2010). What is Twitter, a
+  social network or a news media? *WWW*.
+- Narayanan, A., & Shmatikov, V. (2009). De-anonymizing social networks.
+  *IEEE S&P*.
+- Sun, X., Guo, J., Ding, X., & Liu, T. (2016). A general framework for
+  content-enhanced network representation learning. arXiv:1610.02906.
+- Traag, V. A., Waltman, L., & van Eck, N. J. (2019). From Louvain to
+  Leiden: guaranteeing well-connected communities. *Scientific Reports*.
+- Tu, C., Liu, H., Liu, Z., & Sun, M. (2017). CANE: Context-aware network
+  embedding for relation modeling. *ACL*.
+- Voitalov, I., van der Hoorn, P., van der Hofstad, R., & Krioukov, D.
+  (2019). Scale-free networks well done. *Physical Review Research*.
+- Xu, et al. (2017). A deep learning approach for expert identification
+  in question answering communities. arXiv:1711.05350.
+- Yuan, S., Zhang, Y., Tang, J., Hall, W., & Cabotà, J. B. (2020). Expert
+  finding in community question answering: a review. *Artificial
+  Intelligence Review* (survey version: arXiv:1807.05540).
+- Zhang, J., Tang, J., & Li, J. (2015). ZhihuRank: A topic-sensitive
+  expert finding algorithm in community question answering websites.
+  *ICWL*.

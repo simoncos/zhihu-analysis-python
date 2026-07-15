@@ -34,8 +34,9 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
   simulation shows the fitted in-degree exponent is underestimated by ~0.6).
 - **Known quality issues.** A crawler bug caused some question→topic tags
   to be missed: 99.3% of answered-question ids resolve to a topic; at user
-  level 18.2% of users with answers lack topic rows. No duplicate users,
-  duplicate edges, or self-loops. Counts are point-in-time profile values,
+  level 18.2% of users with answers lack topic rows. `user_topics`
+  additionally contains 53 uids with no corresponding `users` row (crawl
+  artifact). No duplicate users, duplicate edges, or self-loops. Counts are point-in-time profile values,
   not aggregates of the crawled content. BFS layers: 1 seed / 146 layer-1
   / 26,014 layer-2 users.
 

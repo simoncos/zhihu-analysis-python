@@ -1,0 +1,61 @@
+{
+  "graph": {
+    "nodes": 26161,
+    "edges": 3132527,
+    "density": 0.004577230071562275,
+    "reciprocity": 0.14377465860629454,
+    "clustering_global_undirected": 0.07879187457004547,
+    "assortativity_degree": -0.18629334853424942,
+    "n_wcc": 1,
+    "giant_wcc_frac": 1.0,
+    "n_scc": 524,
+    "giant_scc_size": 25635,
+    "giant_scc_frac": 0.9798937349489698,
+    "avg_shortest_path_giant_scc_sampled": 2.6237593820706873,
+    "n_path_samples": 500
+  },
+  "topics": {
+    "rows": 5414129,
+    "distinct_topics": 46647,
+    "users_with_topics": 17914,
+    "topics_per_user_median": 71.0,
+    "topics_per_user_mean": 150.47755945070895,
+    "topic_freq_top20": {
+      "调查类问题": 121179,
+      "生活": 78575,
+      "心理学": 46809,
+      "恋爱": 41527,
+      "互联网": 40831,
+      "情感": 39736,
+      "电影": 39388,
+      "历史": 39209,
+      "社会": 34857,
+      "人际交往": 34128,
+      "音乐": 32666,
+      "两性关系": 29107,
+      "知乎": 28144,
+      "游戏": 24629,
+      "法律": 23999,
+      "教育": 23784,
+      "人生": 22471,
+      "爱情": 22293,
+      "政治": 21846,
+      "程序员": 19899
+    },
+    "topic_freq_median": 10.0,
+    "topic_freq_gini_like_top1pct_share": 0.5453503232006478
+  },
+  "homophily": {
+    "n_edge_pairs": 100000,
+    "n_random_pairs": 99995,
+    "jaccard_followed_mean": 0.05279603691592223,
+    "jaccard_random_mean": 0.02880895867058256,
+    "ratio": 1.8326256606363696,
+    "nonzero_overlap_followed": 0.95367,
+    "nonzero_overlap_random": 0.7874793739686984
+  },
+  "seed_check": {
+    "seed_followee_num": 149,
+    "layer1_crawled": 146
+  }
+}
