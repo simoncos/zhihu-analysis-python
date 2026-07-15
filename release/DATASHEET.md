@@ -75,14 +75,27 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
 
 - All collected fields were public at crawl time; the release removes
   usernames and URL slugs and pseudonymizes question ids.
-- Residual risk (checked, not hypothetical): accounts at the extreme top
-  of the count distributions ARE identifiable by count signature — e.g.
-  the maximum follower count (921,940) corresponds to the publicly known
-  most-followed Zhihu account of late 2015. We assess this as acceptable:
-  those are public figures, the exposed fields are aggregate counts that
-  were publicly displayed on their profiles at the time, and no content or
-  username is included. For non-celebrity accounts the 10-year staleness
-  of the counts makes signature matching impractical.
+- Residual risk — measured, not hypothetical. Pseudonymization here
+  protects against *casual* identification; it does not defend against an
+  adversary who already holds 2015-era auxiliary data. Concretely:
+  - 92.4% of users have a *unique* 5-tuple of profile counts, and 12.8%
+    are unique on follower count alone. Anyone possessing an independent
+    late-2015 snapshot of Zhihu profiles could re-identify most users by
+    count matching; graph-structural attacks (Narayanan & Shmatikov 2009)
+    would work similarly. Such an adversary, however, already possesses
+    the disclosed information — the release adds nothing they lack.
+  - Top-of-distribution accounts are identifiable without auxiliary data
+    (e.g. the maximum follower count, 921,940, matches the publicly known
+    most-followed account of late 2015). These are public figures and the
+    fields are counts their profiles displayed publicly.
+  - We deliberately do NOT coarsen or perturb the counts: the exact
+    distributions are a primary scientific payload of the release (see the
+    paper's characterization section), and the data is 10+ years stale.
+- Prior circulation: the raw (non-pseudonymized) database was publicly
+  shared via a Baidu-pan link from 2016 until the link's demise, and
+  briefly as a GitHub release asset during release preparation. The
+  official pseudonymized release supersedes these; copies under the
+  maintainer's control are removed at publication time.
 - Takedown: contact the maintainer to have a specific pseudonymized record
   removed in a new version.
 
