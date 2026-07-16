@@ -14,6 +14,8 @@
 	- [知乎社交网络分析（下）：关注网络](http://www.jianshu.com/p/3b2a1895a12d)
 - English
 	- [Project Report](https://github.com/simoncos/zhihu-analysis-python/tree/master/analysis-report)
+- 文献综述更新（2026）
+	- [知乎社交网络分析：文献综述更新（2015–2026）](analysis-report/literature-review-2026.md)
 
 ## 文件说明
 
