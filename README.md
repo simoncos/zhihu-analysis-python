@@ -24,6 +24,7 @@
 - `zhihu_schema.sql`：SQLite数据库的schema
 - `zhihu_database.py`：将csv中的数据导入至数据库中
 - `zhihu_analysis.py`：从数据库中提取数据并进行分析
+- `powerlaw_analysis.py`：（2026 新增）对五项用户特征做 Clauset-Shalizi-Newman 式幂律统计检验（对应[文献综述](analysis-report/literature-review-2026.md)建议 6.6；Python 3，`pip install powerlaw pandas matplotlib` 后 `python powerlaw_analysis.py path/to/zhihu.db`）
 
 ## 爬虫部分已知问题及（可能）原因
 
