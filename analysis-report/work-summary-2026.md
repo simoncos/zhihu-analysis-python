@@ -53,7 +53,7 @@
 
 | 优先级 | 方向 | 说明 | 需补数据 |
 |---|---|---|---|
-| ★★★ | 6.1 异质网络专家发现 | 在 2015 快照上建用户-话题-问题异质图，对比 PageRank/HITS 与 metapath/HGNN/GAT；完成原计划并填补知乎缺口 | 否 |
+| ★★★ | 6.1 异质网络专家发现 | **首轮实验已完成**：`expert_finding_analysis.py` 四代方法同台对比，异质 GraphSAGE 全面最优（ρ=0.871 / NDCG@100=0.845 / P@100=0.60），PageRank 最弱（ρ=0.528）；代际排序与"内容+结构"增益均获验证。结果见 [expert-finding-results/](expert-finding-results/expert_finding_results.md)，综述 6.1 节已更新。可扩展：按话题分组排序（TUEF 式）、多种子置信区间 | 已解决 |
 | ★★★ | 6.6 幂律统计检验 | **已完成**：对原始 `zhihu.db`（GitHub release `dataset-v0`）运行 `powerlaw_analysis.py`，五项特征中四项拒绝纯幂律、支持指数截断幂律（唯关注数/出度例外），证实 2018 年文献的截断幂律论断可回溯至 2015 年。结果见 [powerlaw-results/](powerlaw-results/powerlaw_results.md)，综述 6.6 节已更新 | 已解决 |
 | ★★☆ | 6.3 影响力回溯 | 重访 2015 年头部用户十年后的现状，用结构嵌入度解释留存/流失；故事性最强 | 是（约 2 千账号轻量采集） |
 | ★★☆ | 6.4 双重基线研究 | 商业化前+AI 前的结构刻画，与 ZhihuRec 跨时点对比 | 否 |
