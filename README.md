@@ -17,6 +17,7 @@
 - 文献综述更新（2026）
 	- [知乎社交网络分析：文献综述更新（2015–2026）](analysis-report/literature-review-2026.md)
 	- [工作总结（2026 年 7 月）](analysis-report/work-summary-2026.md)
+	- [项目交接文档（HANDOFF）](HANDOFF.md)
 
 ## 文件说明
 
