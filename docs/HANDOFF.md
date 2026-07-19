@@ -14,7 +14,7 @@
 | Power-law model selection | Canonical code includes GOF plus direct TPL-vs-lognormal comparison; committed table needs regeneration |
 | 2015-2026 literature review | Preserved in `analysis-report/literature-review-2026.md` |
 | Expert-finding comparison | Pilot result preserved; single split/seed, not yet publication-grade |
-| Concentration/Lorenz analysis | Ported into scalable `analysis.characterize`; needs a real-data rerun |
+| Structural/concentration analysis | SCC and WCC path baselines, directed and undirected assortativity, k-core, topic-size, concentration and Lorenz metrics are integrated in `analysis.characterize`; needs a real-data rerun |
 | Anonymous dataset release | Tooling and documentation prepared; publication not completed |
 | Community-interest alignment | Only the homophily demonstration is complete; full community study remains future work |
 
@@ -22,14 +22,19 @@
 
 1. `analysis/` is the only maintained general analysis pipeline.
 2. The standalone literature-branch `powerlaw_analysis.py` was retired. Its
-   five-series artifacts remain under `analysis-report/powerlaw-results/` as
-   a clearly labelled archive.
-3. Structural characterization uses igraph. The Gini, 90-9-1, k-core and
-   Lorenz metrics from the incomplete NetworkX script were ported into
-   `analysis.characterize`.
+   sample accounting, stretched-exponential comparison, truncated-power-law
+   parameters and fitted curve are integrated into `analysis.powerlaw_fit`;
+   its five-series artifacts remain under `analysis-report/powerlaw-results/`
+   as a clearly labelled archive.
+3. Structural characterization uses igraph. The Gini, 90-9-1, k-core,
+   Lorenz, topic-size, undirected assortativity and giant-WCC path metrics
+   from the incomplete NetworkX script are ported alongside the existing
+   directed giant-SCC metrics in `analysis.characterize`.
 4. A model may be named lognormal or truncated power law only after their
    direct likelihood comparison is significant. Both beating pure power law
-   does not select between them.
+   does not select between them. The stretched-exponential comparison is
+   retained as a diagnostic; the direct TPL-vs-lognormal result does not claim
+   that its winner also beats the stretched exponential.
 5. Expert finding remains a standalone optional experiment because its
    PyTorch/PyG dependency footprint is much heavier than the core pipeline.
 

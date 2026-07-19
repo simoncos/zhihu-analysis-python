@@ -3,8 +3,10 @@
 
 For each series we report the MLE fit, a semi-parametric bootstrap
 goodness-of-fit p-value, and Vuong likelihood-ratio comparisons against
-lognormal / exponential / truncated power law, then classify the result
-following Broido & Clauset (2019).
+lognormal / exponential / truncated power law / stretched exponential, then
+classify the result following Broido & Clauset (2019). The output also retains
+the sample-accounting and truncated-power-law parameters from the retired
+profile-only analysis.
 """
 
 import warnings
@@ -13,7 +15,12 @@ import numpy as np
 import pandas as pd
 import powerlaw
 
-ALTERNATIVES = ["lognormal", "exponential", "truncated_power_law"]
+ALTERNATIVES = [
+    "lognormal",
+    "exponential",
+    "truncated_power_law",
+    "stretched_exponential",
+]
 MODEL_SELECTION_P = 0.1
 
 
@@ -31,7 +38,9 @@ def gof_pvalue(data, fit, n_sims=100, rng=None):
     below = data[data < fit.xmin]
     n_tail = int(fit.n_tail)
     n = len(data)
-    d_emp = fit.power_law.D  # KS distance computed during fitting
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        d_emp = fit.power_law.D  # KS distance computed during fitting
     exceed = 0
     for _ in range(n_sims):
         n_tail_sim = rng.binomial(n, n_tail / n)
@@ -42,7 +51,10 @@ def gof_pvalue(data, fit, n_sims=100, rng=None):
         else:
             sim = sim_tail
         sim_fit = _fit(sim)
-        if sim_fit.power_law.D >= d_emp:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            d_sim = sim_fit.power_law.D
+        if d_sim >= d_emp:
             exceed += 1
     return exceed / n_sims
 
@@ -68,20 +80,22 @@ def classify(row):
     alternative_key = None
     if tpl_vs_ln_p is not None and tpl_vs_ln_p < MODEL_SELECTION_P:
         if tpl_vs_ln_r > 0:
-            alternative, alternative_key = "Truncated power law", "truncated_power_law"
+            alternative = "Truncated power law favored over lognormal"
+            alternative_key = "truncated_power_law"
         else:
-            alternative, alternative_key = "Lognormal", "lognormal"
+            alternative = "Lognormal favored over truncated power law"
+            alternative_key = "lognormal"
 
     if gof_rejected:
         if alternative and alternative_key in losses:
-            return f"Not power law; {alternative} favored"
+            return f"Not power law; {alternative}"
         if not losses:
             return "Not power law; no supported alternative selected"
-        return "Not power law; TPL vs lognormal unresolved"
+        return "Not power law; alternative family unresolved"
 
     if losses:
         if alternative and alternative_key in losses:
-            return f"{alternative} favored"
+            return alternative
         return "Power law plausible; alternative family unresolved"
 
     wins = [
@@ -94,17 +108,38 @@ def classify(row):
 
 
 def analyze_series(name, values, n_sims=100):
-    data = np.asarray(values)
-    data = data[data > 0]
+    raw = np.asarray(values, dtype=float)
+    finite = np.isfinite(raw)
+    data = raw[finite & (raw > 0)]
+    if len(data) == 0:
+        raise ValueError(f"{name} has no finite positive observations")
     fit = _fit(data)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        alpha = fit.power_law.alpha
+        xmin = fit.power_law.xmin
+        sigma = fit.power_law.sigma
+        ks_distance = fit.power_law.D
+        tpl_alpha = fit.truncated_power_law.alpha
+        tpl_lambda = fit.truncated_power_law.parameter2
     row = {
         "series": name,
+        # Keep ``n`` as the positive-support count for compatibility with the
+        # existing canonical CSV while making the full accounting explicit.
         "n": len(data),
-        "alpha": fit.power_law.alpha,
-        "xmin": fit.power_law.xmin,
-        "sigma": fit.power_law.sigma,
+        "n_total": len(raw),
+        "n_positive": len(data),
+        "n_zero_dropped": int(np.sum(finite & (raw == 0))),
+        "n_negative_dropped": int(np.sum(finite & (raw < 0))),
+        "n_nonfinite_dropped": int(np.sum(~finite)),
+        "alpha": alpha,
+        "xmin": xmin,
+        "sigma": sigma,
+        "ks_distance": ks_distance,
         "n_tail": int(fit.n_tail),
         "gof_p": gof_pvalue(data, fit, n_sims=n_sims) if n_sims else None,
+        "tpl_alpha": tpl_alpha,
+        "tpl_lambda": tpl_lambda,
     }
     for alt in ALTERNATIVES:
         with warnings.catch_warnings():
@@ -129,8 +164,15 @@ def plot_ccdf(name, fit, out_path):
 
     fig, ax = plt.subplots(figsize=(5, 4))
     fit.plot_ccdf(ax=ax, marker=".", linestyle="none", color="#555", label="data")
-    fit.power_law.plot_ccdf(ax=ax, linestyle="--", label=f"power law (α={fit.power_law.alpha:.2f})")
-    fit.lognormal.plot_ccdf(ax=ax, linestyle=":", label="lognormal")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        fit.power_law.plot_ccdf(
+            ax=ax, linestyle="--", label=f"power law (α={fit.power_law.alpha:.2f})"
+        )
+        fit.truncated_power_law.plot_ccdf(
+            ax=ax, linestyle="-", label="truncated power law"
+        )
+        fit.lognormal.plot_ccdf(ax=ax, linestyle=":", label="lognormal")
     ax.set_title(f"CCDF: {name}")
     ax.set_xlabel(name)
     ax.set_ylabel("P(X ≥ x)")
@@ -142,7 +184,22 @@ def plot_ccdf(name, fit, out_path):
 
 def results_markdown(rows):
     df = pd.DataFrame(rows)
-    cols = ["series", "n", "n_tail", "alpha", "xmin", "sigma", "gof_p"]
+    cols = [
+        "series",
+        "n_total",
+        "n_positive",
+        "n_zero_dropped",
+        "n_negative_dropped",
+        "n_nonfinite_dropped",
+        "n_tail",
+        "alpha",
+        "xmin",
+        "sigma",
+        "ks_distance",
+        "gof_p",
+        "tpl_alpha",
+        "tpl_lambda",
+    ]
     cols += [c for a in ALTERNATIVES for c in (f"R_{a}", f"p_{a}")]
     cols += ["R_tpl_vs_lognormal", "p_tpl_vs_lognormal"]
     cols += ["verdict"]
@@ -151,7 +208,8 @@ def results_markdown(rows):
         "",
         "- R>0 且 p<0.1：幂律优于该备择分布；R<0 且 p<0.1：备择分布更优；p≥0.1：无法区分",
         "- gof_p < 0.1 时幂律假设本身被拒绝（CSN bootstrap）",
-        "- R_tpl_vs_lognormal > 0 偏向截断幂律，< 0 偏向对数正态；只有直接比较显著时才命名胜出模型",
+        "- R_tpl_vs_lognormal > 0 偏向截断幂律，< 0 偏向对数正态；只有直接比较显著时才命名两者之间的胜出模型",
+        "- stretched exponential 作为独立诊断对照；当前结论不声称 TPL/lognormal 胜者优于它",
         "",
         df[cols].round(4).to_markdown(index=False),
         "",

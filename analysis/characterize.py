@@ -43,17 +43,47 @@ def concentration_shares(values):
     }
 
 
-def graph_structure(g, rng, n_path_samples=500):
+def sampled_path_stats(g, rng, n_path_samples=500, mode="all"):
+    """Sample source-to-target distances without materializing a dense matrix."""
+    if g.vcount() <= 1:
+        return {"mean": 0.0, "diameter_lower_bound": 0, "n_sources": g.vcount()}
+
+    sources = rng.choice(g.vcount(), size=min(n_path_samples, g.vcount()), replace=False)
+    distance_sum = 0.0
+    distance_count = 0
+    diameter_lower_bound = 0
+    for source in sources:
+        distances = np.asarray(g.distances(source=[int(source)], mode=mode)[0], dtype=float)
+        distances = distances[np.isfinite(distances) & (distances > 0)]
+        if len(distances):
+            distance_sum += float(distances.sum())
+            distance_count += len(distances)
+            diameter_lower_bound = max(diameter_lower_bound, int(distances.max()))
+
+    return {
+        "mean": float(distance_sum / distance_count) if distance_count else 0.0,
+        "diameter_lower_bound": diameter_lower_bound,
+        "n_sources": len(sources),
+    }
+
+
+def graph_structure(g, rng, n_path_samples=500, wcc_rng=None):
+    undirected = g.as_undirected(mode="collapse")
+    assortativity_directed = g.assortativity_degree(directed=True)
     stats = {
         "nodes": g.vcount(),
         "edges": g.ecount(),
         "density": g.density(),
         "reciprocity": g.reciprocity(),
-        "clustering_global_undirected": g.as_undirected(mode="collapse").transitivity_undirected(),
-        "assortativity_degree": g.assortativity_degree(directed=True),
-        "max_k_core_undirected": max(g.as_undirected(mode="collapse").coreness()),
+        "clustering_global_undirected": undirected.transitivity_undirected(),
+        # Preserve the original key while making its directed semantics clear.
+        "assortativity_degree": assortativity_directed,
+        "assortativity_degree_directed": assortativity_directed,
+        "assortativity_degree_undirected": undirected.assortativity_degree(directed=False),
+        "max_k_core_undirected": max(undirected.coreness()),
     }
-    wcc = g.connected_components(mode="weak").sizes()
+    wcc_obj = g.connected_components(mode="weak")
+    wcc = wcc_obj.sizes()
     scc_obj = g.connected_components(mode="strong")
     scc = sorted(scc_obj.sizes(), reverse=True)
     stats["n_wcc"] = len(wcc)
@@ -62,16 +92,18 @@ def graph_structure(g, rng, n_path_samples=500):
     stats["giant_scc_size"] = scc[0]
     stats["giant_scc_frac"] = scc[0] / g.vcount()
 
-    giant = g.induced_subgraph(scc_obj.giant().vs.indices if hasattr(scc_obj, "giant") else None) \
-        if False else scc_obj.giant()
-    sources = rng.choice(giant.vcount(), size=min(n_path_samples, giant.vcount()), replace=False)
-    dists = []
-    for s in sources:
-        d = giant.distances(source=[int(s)], mode="out")[0]
-        d = [x for x in d if np.isfinite(x) and x > 0]
-        dists.append(np.mean(d))
-    stats["avg_shortest_path_giant_scc_sampled"] = float(np.mean(dists))
-    stats["n_path_samples"] = len(sources)
+    scc_paths = sampled_path_stats(scc_obj.giant(), rng, n_path_samples, mode="out")
+    stats["avg_shortest_path_giant_scc_sampled"] = scc_paths["mean"]
+    stats["n_path_samples"] = scc_paths["n_sources"]
+
+    # The literature-review branch used an undirected giant-WCC baseline. Keep
+    # it alongside, rather than silently replacing the directed SCC measure.
+    giant_wcc = wcc_obj.giant().as_undirected(mode="collapse")
+    wcc_rng = wcc_rng or np.random.default_rng(2016)
+    wcc_paths = sampled_path_stats(giant_wcc, wcc_rng, n_path_samples, mode="all")
+    stats["avg_shortest_path_giant_wcc_undirected_sampled"] = wcc_paths["mean"]
+    stats["diameter_lower_bound_giant_wcc_undirected"] = wcc_paths["diameter_lower_bound"]
+    stats["n_path_samples_giant_wcc_undirected"] = wcc_paths["n_sources"]
     return stats
 
 
@@ -88,6 +120,8 @@ def topic_side(ut, user):
         "topic_freq_top20": topic_freq.head(20).to_dict(),
         "topic_freq_median": float(topic_freq.median()),
         "topic_user_size_gini": gini(topic_user_sizes.values),
+        "topic_user_size_median": float(topic_user_sizes.median()),
+        "topic_user_size_mean": float(topic_user_sizes.mean()),
         "topics_with_at_least_20_users": int((topic_user_sizes >= 20).sum()),
         "largest_topic_user_count": int(topic_user_sizes.max()),
         "topic_freq_gini_like_top1pct_share": float(
@@ -189,6 +223,9 @@ def main():
     ap.add_argument("--out", default="results")
     args = ap.parse_args()
     rng = np.random.default_rng(2015)
+    # Keep the added WCC baseline on an independent stream so it cannot alter
+    # the existing SCC and homophily samples for the canonical seed.
+    wcc_rng = np.random.default_rng(2016)
 
     user = load_parquet(args.parquet, "User")
     following = load_parquet(args.parquet, "Following")
@@ -197,7 +234,7 @@ def main():
 
     out = {}
     print("graph structure ...")
-    out["graph"] = graph_structure(g, rng)
+    out["graph"] = graph_structure(g, rng, wcc_rng=wcc_rng)
     print(json.dumps(out["graph"], indent=2))
     print("topic side ...")
     out["topics"] = topic_side(ut, user)
