@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Dataset-paper characterization: induced-graph structure, topic side,
-and a follow-edge topic-homophily experiment.
+"""Canonical dataset characterization.
+
+Combines the scalable igraph implementation with the contribution-
+concentration and Lorenz-curve metrics from the literature-review branch.
+It covers induced-graph structure, the topic layer, a follow-edge homophily
+experiment, and the 90-9-1 concentration hypothesis.
 
 Usage: python -m analysis.characterize --parquet results/parquet --out results
 """
@@ -15,6 +19,30 @@ import pandas as pd
 from .data_io import build_induced_graph, load_parquet
 
 
+def gini(values):
+    values = np.sort(np.asarray(values, dtype=float))
+    if len(values) == 0 or values.sum() == 0:
+        return 0.0
+    cumulative = np.cumsum(values)
+    return float((len(values) + 1 - 2 * (cumulative / cumulative[-1]).sum()) / len(values))
+
+
+def concentration_shares(values):
+    """Return the top-1%, next-9%, and bottom-90% shares."""
+    values = np.sort(np.asarray(values, dtype=float))[::-1]
+    if len(values) == 0 or values.sum() == 0:
+        return {"top_1pct": 0.0, "next_9pct": 0.0, "bottom_90pct": 0.0}
+    top_1_end = max(1, len(values) // 100)
+    top_10_end = max(1, len(values) // 10)
+    top_1 = values[:top_1_end].sum() / values.sum()
+    top_10 = values[:top_10_end].sum() / values.sum()
+    return {
+        "top_1pct": float(top_1),
+        "next_9pct": float(top_10 - top_1),
+        "bottom_90pct": float(1 - top_10),
+    }
+
+
 def graph_structure(g, rng, n_path_samples=500):
     stats = {
         "nodes": g.vcount(),
@@ -23,6 +51,7 @@ def graph_structure(g, rng, n_path_samples=500):
         "reciprocity": g.reciprocity(),
         "clustering_global_undirected": g.as_undirected(mode="collapse").transitivity_undirected(),
         "assortativity_degree": g.assortativity_degree(directed=True),
+        "max_k_core_undirected": max(g.as_undirected(mode="collapse").coreness()),
     }
     wcc = g.connected_components(mode="weak").sizes()
     scc_obj = g.connected_components(mode="strong")
@@ -49,6 +78,7 @@ def graph_structure(g, rng, n_path_samples=500):
 def topic_side(ut, user):
     per_user = ut.groupby("user_url").agg(rows=("topic", "size"), distinct=("topic", "nunique"))
     topic_freq = ut["topic"].value_counts()
+    topic_user_sizes = ut.groupby("topic")["user_url"].nunique()
     return {
         "rows": len(ut),
         "distinct_topics": int(ut["topic"].nunique()),
@@ -57,10 +87,64 @@ def topic_side(ut, user):
         "topics_per_user_mean": float(per_user["distinct"].mean()),
         "topic_freq_top20": topic_freq.head(20).to_dict(),
         "topic_freq_median": float(topic_freq.median()),
+        "topic_user_size_gini": gini(topic_user_sizes.values),
+        "topics_with_at_least_20_users": int((topic_user_sizes >= 20).sum()),
+        "largest_topic_user_count": int(topic_user_sizes.max()),
         "topic_freq_gini_like_top1pct_share": float(
             topic_freq.head(max(1, len(topic_freq) // 100)).sum() / topic_freq.sum()
         ),
     }
+
+
+def contribution_concentration(g, user):
+    """Quantify the 90-9-1 pattern for activity, audience, and graph degree."""
+    in_degree = pd.Series(g.degree(mode="in"), index=g.vs["name"])
+    aligned_in_degree = in_degree.reindex(user["user_url"]).fillna(0).to_numpy()
+    series = {
+        "answers": user["answer_num"],
+        "agrees": user["agree_num"],
+        "thanks": user["thanks_num"],
+        "followers_platform_wide": user["follower_num"],
+        "in_degree_induced": aligned_in_degree,
+    }
+    return {
+        name: {"gini": gini(values), **concentration_shares(values)}
+        for name, values in series.items()
+    }
+
+
+def plot_lorenz_curves(g, user, out_path):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    in_degree = pd.Series(g.degree(mode="in"), index=g.vs["name"])
+    aligned_in_degree = in_degree.reindex(user["user_url"]).fillna(0).to_numpy()
+    series = {
+        "agrees": user["agree_num"],
+        "answers": user["answer_num"],
+        "in-degree": aligned_in_degree,
+    }
+    fig, ax = plt.subplots(figsize=(6, 4.5))
+    for label, values in series.items():
+        values = np.sort(np.asarray(values, dtype=float))
+        cumulative = np.cumsum(values)
+        if cumulative[-1] == 0:
+            continue
+        ax.plot(
+            np.linspace(0, 1, len(values)),
+            cumulative / cumulative[-1],
+            label=f"{label} (Gini {gini(values):.2f})",
+        )
+    ax.plot([0, 1], [0, 1], "k--", linewidth=0.8, label="perfect equality")
+    ax.set_xlabel("cumulative share of users (lowest first)")
+    ax.set_ylabel("cumulative share of total")
+    ax.set_title("Lorenz curves, 2015 Zhihu snapshot")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
 
 
 def homophily(g, ut, rng, n_samples=100_000):
@@ -117,6 +201,8 @@ def main():
     print(json.dumps(out["graph"], indent=2))
     print("topic side ...")
     out["topics"] = topic_side(ut, user)
+    print("contribution concentration ...")
+    out["concentration"] = contribution_concentration(g, user)
     print("homophily experiment ...")
     out["homophily"] = homophily(g, ut, rng)
     print(json.dumps(out["homophily"], indent=2))
@@ -128,7 +214,10 @@ def main():
         "layer1_crawled": int((user["layer"] == 1).sum()),
     }
 
-    Path(args.out, "characterization.json").write_text(
+    out_dir = Path(args.out)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    plot_lorenz_curves(g, user, out_dir / "lorenz_curves.png")
+    Path(out_dir, "characterization.json").write_text(
         json.dumps(out, ensure_ascii=False, indent=2, default=str)
     )
     print(f"done -> {args.out}/characterization.json")

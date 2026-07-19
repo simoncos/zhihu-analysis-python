@@ -1,55 +1,93 @@
-# 知乎社交网络分析
+# 知乎社交网络分析 / Zhihu2015
 
-## 简介
+本仓库保存 2015 年课程项目及其 2026 年现代化研究工作。当前 canonical
+integration branch 是 `codex/canonical-integration`：它整合了原始 Python 2
+代码、Python 3 数据分析流水线、2015-2026 文献综述、专家发现实验、数据集论文
+草稿和匿名化发布工具。
 
-项目包含基于[zhihu-python](https://github.com/egrcc/zhihu-python)的多线程爬虫，数据I/O（`SQLite`,`csv`），以及基于用户关注网络的分析（使用[networkx](https://networkx.github.io/)作为图算法库）。
+## 项目定位
 
-注：[本项目所使用的zhihu-python](https://github.com/simoncos/zhihu-analysis-python/tree/master/crawler)已与原版存在差异
+2015 年项目从单一种子用户出发，以两层 BFS 采集知乎公开关系数据，形成五张
+SQLite 表：`User`、`Following`、`Question`、`UserQuestion`、`UserTopic`。
+恢复出的数据库包含约 2.6 万名完整画像用户、461 万条关注边、224 万个问题和
+541 万条用户-话题记录。
 
-## 详细内容
+这个快照不能代表今天的知乎，也不是全站随机样本；它的主要价值是作为商业化和
+生成式 AI 之前、同时包含关注图与话题活动层的历史数据。
 
-- [Dataset](http://pan.baidu.com/s/1bos5RqR)
-- 中文
-	- [知乎社交网络分析（上）：基本统计](http://www.jianshu.com/p/60ffb949113f)
-	- [知乎社交网络分析（下）：关注网络](http://www.jianshu.com/p/3b2a1895a12d)
-- English
-	- [Project Report](https://github.com/simoncos/zhihu-analysis-python/tree/master/analysis-report)
+原始材料：
 
-## 文件说明
+- [2015 英文项目报告](analysis-report/Social%20Network%20Analysis%20of%20Zhihu.pdf)
+- [2015 演示文稿](analysis-report/Social%20Network%20Analysis%20of%20Zhihu_slides.pdf)
+- [2015-2026 文献综述](analysis-report/literature-review-2026.md)
+- [研究路线图](RESEARCH_ROADMAP.md)与[执行计划](RESEARCH_PLAN.md)
+- [canonical 交接文档](docs/HANDOFF.md)
 
-- `crawler`文件夹：爬虫部分，以广度优先策略爬取知乎数据，并以csv格式储存（这一部分代码目前版本有误，爬到的数据文件与`zhihu_database.py`无法衔接，此外存在topic爬漏的问题，待修复）
-- `zhihu_schema.sql`：SQLite数据库的schema
-- `zhihu_database.py`：将csv中的数据导入至数据库中
-- `zhihu_analysis.py`：从数据库中提取数据并进行分析
+## 数据治理状态
 
-## 爬虫部分已知问题及（可能）原因
+匿名化数据集尚未正式发布。原始数据库包含可识别的用户 URL/名称，不应继续公开
+传播或作为 README 中的下载入口。发布前必须执行
+[`release/PUBLISHING.md`](release/PUBLISHING.md) 的隐私检查，移除旧的未脱敏
+release 资产，再发布 `analysis.release` 生成的 `release_build/public/`；
+`release_build/private/` 永不上传。
 
-**爬虫部分已年久失修，由于这个project的重点不在于爬虫，所以不打算更新了，还请谨慎入坑:)**
+## Python 3 分析流水线
 
-- zhihu-python InsecureRequestWarning | urlib
-- topic.py 会爬漏话题标签 | 原因未知
-
-## 未来计划
-
-之后考虑利用已有数据集再做一些分析，比如用户聚类、用户-话题-问题网络之类。
-
-研究方向调研与执行计划见 [`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md) 与 [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)。
-
-## 新版分析流水线（2026，Python 3）
-
-`analysis/` 包实现了 Phase 0（数据体检）+ 项目一（严谨幂律检验、BFS 采样偏差模拟）：
+核心环境：
 
 ```bash
-pip install -r requirements.txt
-
-# 完整流水线（需要 zhihu.db 放在仓库根目录）
-python -m analysis.run_all --db zhihu.db --out results
-
-# 采样偏差模拟（不需要真实数据）
-python -m analysis.run_all --bfs-bias --out results
-
-# 无数据时用合成数据库做冒烟测试
-python -m analysis.run_all --synth --out /tmp/smoke --gof-sims 20
+python -m pip install -r requirements.txt
 ```
 
-输出：`results/health_check.md`（数据体检）、`results/powerlaw_results.md`（CSN 幂律拟合 + 与对数正态等备择分布的似然比检验）、`results/figures/`（各特征 CCDF 图）、`results/bfs_bias_simulation.md`（采样偏差实验）。
+无真实数据时，可先运行合成数据库冒烟测试：
+
+```bash
+python -m analysis.run_all --synth --out /tmp/zhihu-smoke --gof-sims 5
+```
+
+真实数据到位后：
+
+```bash
+# 数据体检、Parquet 导出、诱导图构建、七个序列的 CSN/GOF 分析
+python -m analysis.run_all --db zhihu.db --out results --gof-sims 100
+
+# 图结构、90-9-1 集中度、话题层和关注边话题同质性
+python -m analysis.characterize --parquet results/parquet --out results
+
+# 不依赖真实数据的两层 BFS 采样偏差模拟
+python -m analysis.run_all --bfs-bias --out results
+```
+
+`analysis/powerlaw_fit.py` 会分别检验纯幂律与各备择分布，并直接比较截断幂律和
+对数正态；只有直接比较显著时才命名胜出模型。已提交结果的来源和重跑要求见
+[`results/README.md`](results/README.md)。
+
+## 专家发现实验
+
+文献综述 branch 新增了四代方法对比：PageRank/HITS、DeepWalk、GraphSAGE 和
+异质 GraphSAGE。它是独立的可选实验，使用额外依赖：
+
+```bash
+python -m pip install -r requirements-expert.txt
+python expert_finding_analysis.py zhihu.db --out expert_results
+```
+
+当前提交结果来自一次固定划分，适合作为先导结果，不应在补齐多随机种子、置信
+区间和公平基线前写成最终论文结论。结果保存在
+[`analysis-report/expert-finding-results/`](analysis-report/expert-finding-results/)。
+
+## 目录地图
+
+- `analysis/`：canonical Python 3 数据、统计、图分析、偏差模拟与发布代码
+- `results/`：真实数据运行产物；不是自动测试结果
+- `analysis-report/`：2015 原报告、2026 文献综述及实验归档
+- `paper/`：数据集论文草稿
+- `release/`：Datasheet、Dataset Card 与发布操作手册
+- `crawler/`、`zhihu_analysis.py`、`zhihu_database.py`：2015 Python 2 历史代码
+- `tests/`：不依赖真实数据库的核心判定与辅助函数测试
+
+## 历史代码说明
+
+旧 crawler 已年久失修，且存在 CSV 与 `zhihu_database.py` 无法直接衔接、topic
+爬漏等已知问题。知乎前端、登录和反爬机制已经彻底变化，本仓库不计划恢复 crawler；
+后续工作聚焦已有快照的可复现分析、隐私治理和研究产出。

@@ -1,13 +1,13 @@
 # Zhihu2015: A Follow-Network Snapshot of China's Largest Q&A Community
 
-> Dataset paper draft v0.1 — target venue: ICWSM dataset track (alt.:
-> NeurIPS D&B, Scientific Data, CSCW). `[TODO]` = fill after real-data run.
-> Numbers in §6 come from `results/powerlaw_results.md`, §7 from
-> `results/bfs_bias_simulation.md` (already final).
+> Dataset paper draft v0.2 — target venue: ICWSM dataset track (alt.:
+> NeurIPS D&B, Scientific Data, CSCW). The real-data artifacts in §6 predate
+> the canonical direct TPL-vs-lognormal comparison and must be regenerated
+> before submission. Dataset publication and DOI metadata are also pending.
 
 ## Abstract
 
-We release Zhihu2015, a December-2015 snapshot of the follow network of
+We prepare Zhihu2015, a December-2015 snapshot of the follow network of
 Zhihu, then and now the largest Chinese community question answering (CQA)
 platform. The dataset covers 26,161 users with complete profile
 counts, 4.61M directed follow edges (459K distinct accounts; 3.13M edges
@@ -18,10 +18,11 @@ the official ZhihuRec dataset exposes recommendation logs but no follow
 relations, prior graph releases are two orders of magnitude smaller, and
 today's anti-crawling measures make the graph impossible to re-collect. Alongside
 the data we contribute (i) a rigorous re-analysis of its degree and
-activity distributions using likelihood-based model comparison: none of
-the seven examined distributions is a pure power law — five are better
-described as lognormal and two as truncated power laws — overturning the
-original report's visual-inspection claims; and (ii) a simulation-based
+activity distributions using likelihood-based model comparison: pure power
+law is rejected by bootstrap GOF for six of seven series, while the remaining
+followee-count series is plausible but has a marginal truncated alternative —
+overturning the original report's visual-inspection claim that all five
+profile series are power laws; and (ii) a simulation-based
 quantification of the bias induced by the crawl's 2-layer BFS design,
 showing that naive use of profile counts underestimates the in-degree
 exponent by ≈0.6. We document anonymization,
@@ -38,7 +39,7 @@ public structural data about Zhihu has always been scarce. Research on the
 platform either uses small purpose-built crawls that are not released, or
 the official ZhihuRec recommendation logs, which contain no social graph.
 
-This paper releases and documents a snapshot collected in December 2015,
+This paper documents a release candidate collected in December 2015,
 when Zhihu had roughly 30M registered users. The snapshot originates from a
 2015 course project; we publish it a decade later because its value has
 inverted: no longer current, it is now unreproducible history — login
@@ -47,9 +48,10 @@ Zhihu's follow graph infeasible, and the 2015 "golden era" community it
 captures no longer exists in that form.
 
 Contributions:
-1. **The dataset**: five tables (users, edges, questions, user-questions,
-   user-topics) under CC BY 4.0, pseudonymized, with datasheet, on
-   Zenodo (DOI) and Hugging Face.
+1. **The dataset release package**: five pseudonymized tables (users, edges,
+   questions, user-questions, user-topics), a datasheet and publication
+   tooling. Zenodo/Hugging Face publication and final license metadata remain
+   pending.
 2. **A rigorous statistical characterization** (§6), replacing the original
    report's visual power-law claims with CSN maximum-likelihood fits and
    model comparison — contributing a Chinese-CQA data point to the
@@ -154,17 +156,19 @@ subgraph's in/out-degree distributions with the CSN framework
 against lognormal, exponential, and truncated power law via normalized
 Vuong likelihood-ratio tests.
 
-**Headline: none of the seven distributions is a pure power law.**
+**Headline: six of seven distributions reject pure power law under bootstrap
+GOF; the seventh remains plausible but does not establish a pure-power-law
+winner over all alternatives.**
 
 | series | α | x_min | n_tail | GOF p | vs lognormal (R, p) | vs trunc. PL (R, p) | verdict |
 |---|---|---|---|---|---|---|---|
-| followees | 2.63 | 550 | 1,587 | .55 | −0.83, .41 | −0.96, .079 | PL plausible; trunc. PL marginally preferred |
-| followers | 2.58 | 75,863 | 268 | .08 | −1.29, .20 | −1.95, **.010** | GOF rejected; trunc. PL |
-| answers | 2.28 | 137 | 2,938 | **<.01** | −4.36, **<.001** | −4.53, **<.001** | GOF rejected; lognormal |
-| agrees | 2.36 | 35,086 | 598 | **.05** | −2.08, **.037** | −2.37, **<.001** | GOF rejected; lognormal |
-| thanks | 2.43 | 8,819 | 536 | **<.01** | −2.11, **.035** | −2.40, **<.001** | GOF rejected; lognormal |
-| induced in-deg | 2.16 | 311 | 2,049 | **<.01** | −5.35, **<.001** | −6.51, **<.001** | GOF rejected; lognormal |
-| induced out-deg | 2.87 | 403 | 1,546 | **<.01** | −2.39, **.017** | −2.44, **<.001** | GOF rejected; lognormal |
+| followees | 2.63 | 550 | 1,587 | .55 | −0.83, .41 | −0.96, .079 | PL plausible; TPL marginal vs PL |
+| followers | 2.58 | 75,863 | 268 | .08 | −1.29, .20 | −1.95, **.010** | GOF rejects PL; TPL beats PL |
+| answers | 2.28 | 137 | 2,938 | **<.01** | −4.36, **<.001** | −4.53, **<.001** | GOF rejects PL; LN/TPL unresolved |
+| agrees | 2.36 | 35,086 | 598 | **.05** | −2.08, **.037** | −2.37, **<.001** | GOF rejects PL; LN/TPL unresolved |
+| thanks | 2.43 | 8,819 | 536 | **<.01** | −2.11, **.035** | −2.40, **<.001** | GOF rejects PL; LN/TPL unresolved |
+| induced in-deg | 2.16 | 311 | 2,049 | **<.01** | −5.35, **<.001** | −6.51, **<.001** | GOF rejects PL; LN/TPL unresolved |
+| induced out-deg | 2.87 | 403 | 1,546 | **<.01** | −2.39, **.017** | −2.44, **<.001** | GOF rejects PL; LN/TPL unresolved |
 
 (GOF p from 100-replicate CSN semi-parametric bootstrap: p < 0.1 rejects
 the power-law hypothesis outright. R < 0 means the alternative fits
@@ -172,16 +176,16 @@ better; exponential loses everywhere. Six of seven series fail GOF; the
 one that passes — followee counts — still marginally prefers a truncated
 power law.)
 
-The original 2015 report concluded from log-log scatter plots that all
-five profile counts "show a significant power law". Under
-likelihood-based testing, *every* series is better described by a
-lognormal or a truncated power law — exactly the pattern Broido & Clauset
-(2019) report across ~1,000 networks. The two follow-count series retain
-heavy power-law-like tails with exponential cutoffs; the activity counts
-(answers, agrees, thanks) and both induced degree distributions are
-decisively lognormal. Zhihu2015 thus contributes a clean Chinese-CQA data
-point to the scale-free debate: visually "scale-free" in every panel,
-statistically scale-free in none.
+The original 2015 report concluded from log-log scatter plots that all five
+profile counts "show a significant power law". Likelihood-based testing does
+not support that blanket claim: six of seven examined series reject pure power
+law under GOF. For answers, agrees, thanks and both induced-degree series,
+lognormal and truncated power law each beat pure power law in separate tests;
+those tests do not choose between the two alternatives. The canonical pipeline
+now performs that direct comparison, and the final alternative labels will be
+filled only after the real-data rerun. Zhihu2015 therefore contributes a
+Chinese-CQA data point to the scale-free debate without overstating which
+heavy-tailed family wins.
 
 CCDF plots for all seven series with fitted overlays:
 `results/figures/` [TODO: select 2–3 for the paper].
@@ -297,9 +301,11 @@ community's scrutiny of that judgement.
 
 ## 11. Availability
 
-Zenodo DOI [TODO] (canonical, versioned) · Hugging Face `simoncos/zhihu2015`
-(mirror) · code: github.com/simoncos/zhihu-analysis-python (analysis +
-release pipeline, MIT). License CC BY 4.0.
+Planned: a versioned Zenodo DOI (canonical) and a Hugging Face dataset mirror.
+The analysis and release-pipeline code is maintained at
+github.com/simoncos/zhihu-analysis-python. No anonymous dataset release or
+final dataset-license grant should be claimed until the publishing checklist
+is complete and the old raw release asset has been removed or restricted.
 
 ## References
 

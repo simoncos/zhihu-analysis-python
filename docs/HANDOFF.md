@@ -1,88 +1,113 @@
-# Session 交接文档（2026-07-15）
+# Canonical project handoff
 
-> 供后续 session / 协作者快速接手。分支：`claude/legacy-project-analysis-ior8d5`
-> （所有工作都已提交推送到该分支，master 未动）。
+> Updated 2026-07-19 on `codex/canonical-integration`. This branch preserves
+> both Claude branch histories and reconciles their duplicated engineering and
+> research surfaces.
 
-## 一句话现状
+## Current state
 
-2015 年的知乎关注网络数据集已完成**匿名化发布准备 + 全部实证分析 +
-数据集论文草稿**，目标 ICWSM 2027 dataset track（截稿 2027-01-15）；
-剩余工作全部依赖仓库所有者的外部操作（Zenodo/HF 发布、删旧数据）或
-收尾工程（LaTeX 化）。
-
-## 项目演进脉络（按时间）
-
-1. **调研阶段**：分析老项目 → 文献综述 → 研究方向清单
-   （`RESEARCH_ROADMAP.md`）→ 执行计划（`RESEARCH_PLAN.md`）；
-2. **方向确定**：用户选定"严谨幂律重访 + 社交/兴趣社区对齐"两个方向，
-   否决了与 ZhihuRec 的纵向对比（口径不可比）；
-3. **战略调整**：使用情况调查发现数据集十年传播零引用 → 用户决定优先做
-   **数据集正式发布 + 数据集论文**（项目零），原项目一的分析成果并入论文;
-4. **数据到位**：用户经 GitHub release `dataset-v0` 上传原始 zhihu.db
-   （百度盘从本环境不可达）→ 全部真实数据分析完成 → 论文实证部分定稿。
-
-## 关键结论（已写入论文，勿重复计算）
-
-- **分布检验**：7 个序列（5 个画像计数 + 诱导子图出/入度）无一是纯幂律；
-  6 个被 GOF bootstrap 直接拒绝；活动类计数与诱导度偏对数正态，
-  关注/粉丝数偏截断幂律。推翻 2015 报告"全部显著幂律"的结论；
-- **BFS 采样偏差**（模拟，不依赖真实数据）：画像计数分布使入度指数被低估
-  约 0.6（BFS 过采高度数节点）；诱导子图度净偏差反而较小；
-- **图结构**：诱导子图 26,161 节点 / 313 万边；巨型 SCC 覆盖 98.0%；
-  采样平均最短路 2.62；互惠率 14.4%（< Twitter 的 22.1%）；同配性 −0.19；
-- **话题层**：68.3% 用户有话题（53 个孤儿 ID 是爬取残留）；前 1% 标签占
-  54.5% 记录量；问题级话题覆盖 99.3%（当年担心的爬漏其实很小）；
-- **同质性演示实验**：被关注对话题 Jaccard 是随机对的 1.83 倍；
-- **匿名化风险量化**：92.4% 用户五元组计数指纹唯一 → 只防随手识别，
-  不防持有 2015 年辅助数据的对手（datasheet 已如实披露）；
-- **相关工作**：存在 CANE/CENE 1 万用户知乎基准（2016-17）→ 论文定位已
-  软化为"最大、文档最全、唯一带问题/话题层"。
-
-## 文件地图
-
-| 路径 | 内容 |
+| Area | Status |
 |---|---|
-| `RESEARCH_ROADMAP.md` / `RESEARCH_PLAN.md` | 方向清单 / 执行计划（含项目零） |
-| `docs/RESEARCH_REVIEW.md` | 详细调研报告（文献综述 + 方法批判 + 使用调查） |
-| `docs/HANDOFF.md` | 本文档 |
-| `analysis/` | Python 3 流水线：data_io / health_check / powerlaw_fit / bfs_bias / characterize / release / synth_db / run_all |
-| `results/` | 真实数据结果：health_check.md、powerlaw_results.{md,csv}、characterization.json、bfs_bias_simulation.{md,csv}、figures/（7 张 CCDF） |
-| `paper/zhihu2015_dataset_paper.md` | 论文草稿（markdown，实证部分定稿） |
-| `release/` | DATASHEET.md、DATASET_CARD.md（HF）、PUBLISHING.md（发布手册+检查清单） |
-| `release_build/`（**不在 git**） | public/（匿名化 5 parquet + stats.json，待发布）；private/（ID 映射，永不发布） |
+| 2015 source project and reports | Preserved as historical Python 2 material |
+| Python 3 data/analysis pipeline | Implemented in `analysis/` |
+| Real-data health, graph, topic and BFS-bias artifacts | Committed in `results/`; not independently rerun during integration |
+| Power-law model selection | Canonical code includes GOF plus direct TPL-vs-lognormal comparison; committed table needs regeneration |
+| 2015-2026 literature review | Preserved in `analysis-report/literature-review-2026.md` |
+| Expert-finding comparison | Pilot result preserved; single split/seed, not yet publication-grade |
+| Concentration/Lorenz analysis | Ported into scalable `analysis.characterize`; needs a real-data rerun |
+| Anonymous dataset release | Tooling and documentation prepared; publication not completed |
+| Community-interest alignment | Only the homophily demonstration is complete; full community study remains future work |
 
-## 数据位置（重要）
+## Canonical decisions
 
-- 原始 `zhihu.db`（722MB）：本 session 的 scratchpad 内（容器回收即消失）+
-  GitHub release `dataset-v0` 的 zhihu.zip（SHA256=f8775f75…）；
-- `release_build/` 在仓库工作目录但被 gitignore——**容器回收后需重新生成**：
-  `python -m analysis.release --db zhihu.db --out release_build`（种子固定，
-  输出确定性可复现，ID 映射也相同）；
-- 复现全部分析：`pip install -r requirements.txt` 后
-  `python -m analysis.run_all --db zhihu.db --out results --gof-sims 100`
-  （GOF 全跑约 30 分钟）+ `python -m analysis.characterize` +
-  `python -m analysis.run_all --bfs-bias`。
+1. `analysis/` is the only maintained general analysis pipeline.
+2. The standalone literature-branch `powerlaw_analysis.py` was retired. Its
+   five-series artifacts remain under `analysis-report/powerlaw-results/` as
+   a clearly labelled archive.
+3. Structural characterization uses igraph. The Gini, 90-9-1, k-core and
+   Lorenz metrics from the incomplete NetworkX script were ported into
+   `analysis.characterize`.
+4. A model may be named lognormal or truncated power law only after their
+   direct likelihood comparison is significant. Both beating pure power law
+   does not select between them.
+5. Expert finding remains a standalone optional experiment because its
+   PyTorch/PyG dependency footprint is much heavier than the core pipeline.
 
-## 待办清单（按依赖顺序）
+## Data and privacy boundary
 
-**只有仓库所有者能做：**
-1. Zenodo 发布拿 DOI + HuggingFace 上传（按 `release/PUBLISHING.md`，
-   发布物 = `release_build/public/`）；
-2. **删除 GitHub release `dataset-v0` 的 zhihu.zip**（原始未脱敏数据公开
-   可下载，不删则匿名化失效）；确认百度盘旧分享已死/关闭；
-3. 核实 ICWSM 2027 dataset track 的双盲细则（icwsm.org 被本环境代理屏蔽）；
-4. 审阅论文 §10 伦理声明（承认违反当年 ToS 的表述需作者本人认可）。
+The recovered database should have these row counts:
 
-**任何 session 可继续：**
-5. DOI 回填论文/数据卡/README + 添加 CITATION.cff；
-6. 论文转 AAAI 双栏 LaTeX，7 张 CCDF 选 2-3 张，摘要压缩；
-7. （论文后）原项目二：社交社区 × 兴趣社区对齐——§6.4 的 1.83× 同质性
-   就是它的先导结果，方法设计在 RESEARCH_PLAN.md T2.1–T2.4。
+| Table | Rows |
+|---|---:|
+| User | 26,161 |
+| Following | 4,612,110 |
+| Question | 2,245,143 |
+| UserQuestion | 1,655,414 |
+| UserTopic | 5,414,129 |
 
-## 环境注意事项
+The old `dataset-v0/zhihu.zip` asset reportedly contains the original,
+unredacted database. It must not be promoted as a reproduction URL. Restrict
+or remove that asset before publishing the anonymous dataset; otherwise the
+anonymization work is ineffective. Do not upload `release_build/private/`.
 
-- 本云环境网络白名单较窄：pan.baidu.com、api.openalex.org、
-  api.semanticscholar.org、icwsm.org 均被代理 403；github.com、pypi 可用；
-- GitHub 操作走 MCP 工具（无 gh CLI）；仓库范围限定 simoncos/zhihu-analysis-python；
-- 依赖见 requirements.txt；powerlaw 包本版本 `KS()` 无参调用有 bug，
-  代码里已改用 `.D` 属性，勿回退。
+## Reproduction
+
+```bash
+python -m pip install -r requirements.txt
+
+# Fast synthetic validation
+python -m analysis.run_all --synth --out /tmp/zhihu-smoke --gof-sims 5
+
+# Canonical real-data analyses
+python -m analysis.run_all --db zhihu.db --out results --gof-sims 100
+python -m analysis.characterize --parquet results/parquet --out results
+python -m analysis.run_all --bfs-bias --out results
+
+# Optional expert-finding pilot
+python -m pip install -r requirements-expert.txt
+python expert_finding_analysis.py zhihu.db --out expert_results
+```
+
+## Evidence currently committed
+
+- Six of seven examined series have bootstrap GOF below 0.1, so pure power
+  law is rejected for those series. Followee counts remain compatible with a
+  pure power law under GOF while a truncated alternative is marginal in the
+  existing comparison.
+- Existing tables show that both lognormal and truncated power law can beat
+  pure power law for several series. The direct alternative comparison added
+  during integration must be rerun before choosing between them.
+- The induced graph artifact reports 26,161 nodes, 3.13M internal edges, a
+  giant SCC containing 98.0% of users, 14.4% reciprocity and sampled mean
+  shortest path 2.62.
+- The topic homophily pilot reports followed pairs with 1.83 times the mean
+  topic Jaccard similarity of random pairs.
+- The expert pilot reports Hetero-GraphSAGE ahead on its one held-out split
+  (Spearman 0.871), but it lacks repeated seeds and confidence intervals.
+
+These are committed branch artifacts, not a fresh independent rerun by the
+integration session.
+
+## Next work, in order
+
+1. Remove or restrict the raw GitHub release asset and confirm old Baidu links
+   are inactive.
+2. Recover `zhihu.db` privately and rerun the canonical pipeline, including
+   direct TPL-vs-lognormal selection and the integrated concentration metrics.
+3. Update the paper and literature review with regenerated tables.
+4. Strengthen expert finding with repeated seeds, confidence intervals,
+   matched supervised baselines and per-topic evaluation.
+5. Complete the publishing checklist, then publish anonymous Parquet files to
+   Zenodo/Hugging Face and fill the DOI/CITATION metadata.
+6. Continue the full social-community versus interest-community alignment
+   study described in `RESEARCH_PLAN.md`.
+
+## Source branch provenance
+
+- `claude/legacy-project-analysis-ior8d5` supplied the Python 3 pipeline,
+  real-data characterization, release tooling and dataset-paper draft.
+- `claude/literature-review-update-9vlyea` supplied the expanded literature
+  review, expert-finding pilot, profile-only power-law archive and
+  concentration-analysis ideas.
+
+Both histories are ancestors of this canonical integration branch.

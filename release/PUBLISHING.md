@@ -7,14 +7,18 @@
 
 ## 发布前检查清单
 
+> **当前阻断项（2026-07-19）**：旧 `dataset-v0/zhihu.zip` 下载入口仍可访问。
+> 根据项目交接记录，该附件包含未脱敏的原始数据库。在它被限制或删除之前，
+> 不得宣称匿名数据集已经发布，也不要继续传播该 URL。
+
 - [ ] 核对 stats.json 与 2015 报告记录数一致，回填 DATASHEET/DATASET_CARD 中的 [TODO]
 - [ ] 抽样人工检查 users.parquet：确认无 user_url/显示名残留
 - [ ] 确认 edges/user_questions 中的 id 均为整数（无原始字符串泄漏）
 - [ ] private/ 目录不在任何上传路径中；加入 .gitignore（已配置 release_build/）
 - [ ] 用公开文件反向自查：能否用"计数指纹"轻易定位某个名人？在 DATASHEET
       残余风险一节如实记录结论（已做：92.4% 用户五元组唯一，已写入 DATASHEET）
-- [ ] **删除 GitHub release `dataset-v0` 的 zhihu.zip 附件**（内含原始
-      user_url/显示名，仅作传输用途；正式发布后必须移除，否则匿名化形同虚设）
+- [ ] **立即限制或删除 GitHub release `dataset-v0` 的 zhihu.zip 附件**（内含原始
+      user_url/显示名；不能等到正式发布后再处理，否则匿名化形同虚设）
 - [ ] 若百度盘分享仍有效，关闭旧分享链接，README 指向 Zenodo/HF
 
 ## Zenodo（正主，出 DOI）

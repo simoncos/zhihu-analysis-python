@@ -7,7 +7,7 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
 
 - **Purpose.** Collected in December 2015 for a course project on social
   network analysis of Zhihu, then the largest Chinese Q&A community
-  (~30M registered users at the time). Released a decade later as a
+  (~30M registered users at the time). Prepared a decade later as a
   historical snapshot: to our knowledge no other public dataset captures
   Zhihu's *follow network* structure, and this period ("golden era" Zhihu)
   can no longer be re-crawled.
@@ -65,12 +65,12 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
 - Not suitable for: content/NLP research (no text), longitudinal claims
   about *current* Zhihu, or any attempt to re-identify individuals.
 
-## Distribution
+## Planned Distribution
 
-- Zenodo (DOI, versioned, canonical) + Hugging Face Datasets (mirror,
-  discoverability). License: CC BY 4.0 for the compiled dataset; underlying
-  profile facts were publicly visible on zhihu.com in 2015.
-- Citation: see CITATION.cff / the dataset paper.
+- Planned after privacy review: Zenodo (DOI, versioned, canonical) + Hugging
+  Face Datasets (mirror, discoverability). The proposed compiled-dataset
+  license is CC BY 4.0; final license approval remains with the maintainer.
+- Citation metadata will be added after the DOI exists.
 
 ## Ethics & Privacy
 
@@ -93,10 +93,10 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
     distributions are a primary scientific payload of the release (see the
     paper's characterization section), and the data is 10+ years stale.
 - Prior circulation: the raw (non-pseudonymized) database was publicly
-  shared via a Baidu-pan link from 2016 until the link's demise, and
-  briefly as a GitHub release asset during release preparation. The
-  official pseudonymized release supersedes these; copies under the
-  maintainer's control are removed at publication time.
+  shared via a Baidu-pan link from 2016 and later as a GitHub release asset
+  during release preparation. As of the canonical integration review on
+  2026-07-19, the GitHub asset remained reachable and is a release blocker.
+  It must be restricted or removed before an official pseudonymized release.
 - Takedown: contact the maintainer to have a specific pseudonymized record
   removed in a new version.
 

@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Optional dependencies for expert_finding_analysis.py.
+gensim>=4.3
+scikit-learn>=1.3
+torch>=2.2
+torch-geometric>=2.5

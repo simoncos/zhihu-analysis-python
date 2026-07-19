@@ -15,13 +15,18 @@ size_categories:
 
 # Zhihu2015: a 2015 Snapshot of the Zhihu Follow Network
 
+> Release-candidate card. The anonymous dataset has not been published. Do
+> not upload this card as-is until the privacy checklist is complete, the old
+> raw asset is restricted or deleted, and DOI/license metadata is finalized.
+
 A historical (December 2015) snapshot of the follow network and
 user-topic activity of Zhihu, the largest Chinese Q&A community.
-To our knowledge the only public dataset of Zhihu's *social graph*
+To our knowledge a candidate for the most fully documented public release of
+Zhihu's *social graph*
 (the official ZhihuRec dataset covers recommendation logs, not the
 follow network). This period of Zhihu can no longer be re-crawled.
 
-**Canonical version & DOI:** Zenodo `[TODO: DOI]`. This HF repo is a mirror.
+**Planned canonical version & DOI:** Zenodo `[TODO: DOI]`; Hugging Face mirror pending.
 **Paper:** `[TODO: link]` · **Code:** https://github.com/simoncos/zhihu-analysis-python
 
 ## Files
