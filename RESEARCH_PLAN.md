@@ -8,14 +8,14 @@
 > 项目一的全部产出（严谨拟合 + 偏差分析）可以直接作为数据集论文的
 > characterization 章节，两者合并为一篇 dataset paper 性价比最高。
 
-## 项目零：数据集发布 + 数据集论文（就绪度：代码和既有分析已完成，隐私治理与 canonical 重跑未完成）
+## 项目零：数据集发布 + 数据集论文（就绪度：代码硬化已实施，完整验证、隐私治理与 canonical 重跑未完成）
 
-- 发布流水线：`analysis/release.py`（匿名化：用户/问题 ID 随机整数化、
-  删除显示名；映射表本地保留不发布）——已实现并经合成数据验证；
+- 发布流水线：`analysis/release.py`（假名化：用户/问题 ID 随机整数化、
+  删除显示名；映射表独立安全目录保留不发布）——已实现，修正版待合成数据验证；
 - 文档三件套：`release/DATASHEET.md`（Gebru 框架）、`release/DATASET_CARD.md`
   （HF 数据卡）、`release/PUBLISHING.md`（Zenodo+HF 操作手册与发布前检查清单）；
 - 论文草稿：`paper/zhihu2015_dataset_paper.md`（目标 ICWSM dataset track；
-  已有真实数据数字，但 §6 需用 canonical 的直接备择模型比较重跑）；
+  旧 inferential headline 已撤下，§6/§7 等待 manifested canonical 重跑）；
 - 收尾顺序：先限制/删除旧未脱敏 release 资产 → 私下恢复 `zhihu.db` →
   `release.py` 出 stats → canonical `run_all.py` 与 `characterize.py` 重跑 →
   发布前检查清单 → Zenodo/HF → 投稿。

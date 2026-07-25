@@ -1,0 +1,22 @@
+name: analysis-tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit-and-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -r requirements-lock.txt
+      - run: python -m unittest discover -s tests -v
+      - run: >-
+          python -m analysis.run_all --synth
+          --out /tmp/zhihu-canonical-smoke
+          --gof-sims 1 --homophily-null-reps 3

@@ -29,9 +29,9 @@ Following the *Datasheets for Datasets* framework (Gebru et al., 2021).
     46,647 distinct topic tags.
 - **Sampling.** NOT a random sample: 2-layer BFS (out-links/followees) from
   a single seed user. The induced subgraph among crawled users is completely
-  observed; everything else is partially observed. Known biases are
-  quantified in the accompanying paper (BFS oversamples high-degree users;
-  simulation shows the fitted in-degree exponent is underestimated by ~0.6).
+  observed; everything else is partially observed. The corrected simulation
+  framework studies this selection mechanism, but no fixed numerical bias is
+  claimed before the multi-graph rerun and sensitivity analysis.
 - **Known quality issues.** A crawler bug caused some question→topic tags
   to be missed: 99.3% of answered-question ids resolve to a topic; at user
   level 18.2% of users with answers lack topic rows. `user_topics`

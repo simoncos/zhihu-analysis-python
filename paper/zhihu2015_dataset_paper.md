@@ -17,15 +17,13 @@ largest and most fully documented public snapshot of Zhihu's social graph:
 the official ZhihuRec dataset exposes recommendation logs but no follow
 relations, prior graph releases are two orders of magnitude smaller, and
 today's anti-crawling measures make the graph impossible to re-collect. Alongside
-the data we contribute (i) a rigorous re-analysis of its degree and
-activity distributions using likelihood-based model comparison: pure power
-law is rejected by bootstrap GOF for six of seven series, while the remaining
-followee-count series is plausible but has a marginal truncated alternative —
-overturning the original report's visual-inspection claim that all five
-profile series are power laws; and (ii) a simulation-based
-quantification of the bias induced by the crawl's 2-layer BFS design,
-showing that naive use of profile counts underestimates the in-degree
-exponent by ≈0.6. We document anonymization,
+the data we contribute (i) a reproducible re-analysis design for its degree
+and activity distributions using likelihood-based model comparison and a
+Monte Carlo-calibrated goodness-of-fit test; and (ii) a sensitivity-analysis
+framework for the bias induced by the crawl's 2-layer BFS design, separating
+profile-count and induced-subgraph estimators. Numerical claims from both
+analyses remain withheld until the corrected canonical pipeline is rerun on
+the private database. We document pseudonymization,
 residual re-identification risk, and intended uses including expert-finding
 benchmarks, interest-homophily studies, and calibration of LLM-based social
 simulations.
@@ -154,38 +152,30 @@ We fit each of the five profile-count distributions and the induced
 subgraph's in/out-degree distributions with the CSN framework
 (`powerlaw`: MLE α, KS-optimal x_min) and compare the power-law model
 against lognormal, exponential, and truncated power law via normalized
-Vuong likelihood-ratio tests.
+Vuong likelihood-ratio tests. The primary reported verdict controls the
+false-discovery rate across the seven GOF tests and, separately, across the
+model-comparison family; unadjusted verdicts remain a sensitivity column.
 
-**Headline: six of seven distributions reject pure power law under bootstrap
-GOF; the seventh remains plausible but does not establish a pure-power-law
-winner over all alternatives.**
+**Canonical result status:** no publication-grade headline is currently
+claimed. The archived table in `results/` is a 100-replicate run produced before the
+canonical direct TPL-vs-lognormal comparison, deterministic bootstrap stream,
+Monte Carlo correction, and exact-source manifest were implemented. It must
+be replaced by an exact-commit run with at least 2,000 bootstrap replicates.
 
-| series | α | x_min | n_tail | GOF p | vs lognormal (R, p) | vs trunc. PL (R, p) | verdict |
-|---|---|---|---|---|---|---|---|
-| followees | 2.63 | 550 | 1,587 | .55 | −0.83, .41 | −0.96, .079 | PL plausible; TPL marginal vs PL |
-| followers | 2.58 | 75,863 | 268 | .08 | −1.29, .20 | −1.95, **.010** | GOF rejects PL; TPL beats PL |
-| answers | 2.28 | 137 | 2,938 | **<.01** | −4.36, **<.001** | −4.53, **<.001** | GOF rejects PL; LN/TPL unresolved |
-| agrees | 2.36 | 35,086 | 598 | **.05** | −2.08, **.037** | −2.37, **<.001** | GOF rejects PL; LN/TPL unresolved |
-| thanks | 2.43 | 8,819 | 536 | **<.01** | −2.11, **.035** | −2.40, **<.001** | GOF rejects PL; LN/TPL unresolved |
-| induced in-deg | 2.16 | 311 | 2,049 | **<.01** | −5.35, **<.001** | −6.51, **<.001** | GOF rejects PL; LN/TPL unresolved |
-| induced out-deg | 2.87 | 403 | 1,546 | **<.01** | −2.39, **.017** | −2.44, **<.001** | GOF rejects PL; LN/TPL unresolved |
+[TODO: insert the manifested canonical table after the private-database rerun.]
 
-(GOF p from 100-replicate CSN semi-parametric bootstrap: p < 0.1 rejects
-the power-law hypothesis outright. R < 0 means the alternative fits
-better; exponential loses everywhere. Six of seven series fail GOF; the
-one that passes — followee counts — still marginally prefers a truncated
-power law.)
+The canonical output will report corrected
+Monte Carlo p-values, 95% simulation intervals, full sample accounting and an
+explicit status when GOF is not evaluated.
 
 The original 2015 report concluded from log-log scatter plots that all five
-profile counts "show a significant power law". Likelihood-based testing does
-not support that blanket claim: six of seven examined series reject pure power
-law under GOF. For answers, agrees, thanks and both induced-degree series,
-lognormal and truncated power law each beat pure power law in separate tests;
-those tests do not choose between the two alternatives. The canonical pipeline
-now performs that direct comparison, and the final alternative labels will be
-filled only after the real-data rerun. Zhihu2015 therefore contributes a
-Chinese-CQA data point to the scale-free debate without overstating which
-heavy-tailed family wins.
+profile counts "show a significant power law". The archival likelihood-based
+run casts doubt on that blanket claim, but its threshold-adjacent p-values and
+100-replicate resolution are insufficient for a final count of rejected
+series. The canonical pipeline now performs direct alternative comparison and
+reports Monte Carlo uncertainty; final labels will be filled only after the
+real-data rerun. Fits are explicitly conditional on positive observations,
+not models of the full zero-inclusive count distribution.
 
 CCDF plots for all seven series with fitted overlays:
 `results/figures/` [TODO: select 2–3 for the paper].
@@ -195,15 +185,15 @@ CCDF plots for all seven series with fitted overlays:
 The fully-observed induced subgraph (26,161 nodes, 3.13M edges) is a
 single weak component containing a giant strongly connected component of
 25,635 nodes (98.0%; 524 SCCs in total). Sampled average shortest path
-length inside the giant SCC is 2.62 (500 sources) — an ultra-small world,
-consistent with (and now generalizing) the 2015 report's elite-subgraph
-values of 2.11/1.85, which we can attribute to the sampling frame rather
-than to elite status alone. Density is 4.6×10⁻³; global clustering
+length inside the giant SCC is 2.62 (500 sources) — descriptively shorter
+than the 2015 report's elite-subgraph values of 2.11/1.85, but the difference
+cannot be causally attributed to sampling frame or elite status from these
+two summaries alone. Density is 4.6×10⁻³; global clustering
 (undirected) 0.079; degree assortativity −0.186 (disassortative, typical
 of follow networks). Reciprocity is 14.4% — notably lower than the 22.1%
-reported for Twitter's early follow graph (Kwak et al. 2010), consistent
-with Zhihu's follow relation acting as an interest subscription rather
-than a social tie.
+reported for Twitter's early follow graph (Kwak et al. 2010). This descriptive
+cross-platform contrast does not by itself identify whether Zhihu follows act
+as interest subscriptions rather than social ties.
 
 ### 6.3 The topic layer
 
@@ -219,39 +209,33 @@ the full table now provides calibrated counts at every rank.
 
 ### 6.4 A demonstration: topic homophily of the follow relation
 
-As a minimal validation that the two layers of the dataset interact
-meaningfully, we compare topic-set Jaccard similarity across 100K sampled
-follow edges (both endpoints crawled, both with topic records) against
-100K random such pairs: 0.0528 vs 0.0288 — followed pairs are 1.83× more
-topically similar, and 95.4% of them share at least one topic (vs 78.7%
-of random pairs; all differences are far beyond sampling noise at these
-sample sizes). The follow graph is thus measurably, but far from
-deterministically, aligned with the interest layer — quantifying this
-alignment at community level is a natural research use of the dataset
-(§8).
+As a minimal validation that the two layers interact, the canonical analysis
+compares topic-set Jaccard similarity on sampled follow edges with repeated
+matched-target permutations. Each observed source is retained while its target
+is replaced by a near neighbour matched on in/out-degree, answer activity,
+topic-set size and crawl layer. This avoids the degree/activity confounding of
+the earlier uniform-user null and reports the full null interval plus a
+permutation p-value. Numerical results remain pending the real-data rerun;
+community-level alignment remains a natural research use (§8).
 
 ## 7. Sampling Bias of the 2-Layer BFS Design
 
-(Final numbers; independent of the real data.)
+We simulate the historical crawl on independent directed
+configuration-model graphs. Out-degree retains the shifted heavy-tailed
+distribution needed for realistic two-layer expansion. Incoming stubs are
+allocated from power-law-distributed target propensities while enforcing the
+equal in/out-stub constraint; the analysis no longer claims that realized
+in-degrees are untouched zeta draws. Multiple seeds within one graph are
+aggregated before graph-level confidence intervals are computed.
 
-We simulate the crawl on directed configuration-model graphs (100K nodes,
-~5M edges, planted power-law in-degree; out-degree given a constant base +
-power-law tail so that its mean ≈ 50, matching the regime of real followee
-counts). Ten independent seeds with realistic out-degree (100–400) each
-yield a 2-layer out-link BFS sample (~5–8% of nodes).
-
-| in-degree estimator | fitted α (mean ± std) |
-|---|---|
-| ground truth, full graph | 2.98 |
-| profile counts of sampled nodes | 2.38 ± 0.16 |
-| induced-subgraph degrees | 2.63 ± 0.15 |
-
-Two findings with direct consequences for users of this dataset:
-1. **Profile counts are individually exact but collectively biased**: BFS
-   overselects high-in-degree nodes, thickening the observed tail and
-   underestimating α by ≈0.6 (consistent with Kurant et al. 2010).
-2. Induced-subgraph degrees combine node overselection with edge
-   truncation; the net bias is smaller here but less predictable.
+The prior implementation balanced stubs by adding roughly 47 incoming stubs
+per node under the default parameters, destroying its stated planted
+distribution. Its reported ≈0.6 effect is therefore withdrawn. Corrected
+multi-graph estimates and sensitivity analyses over density, seed activity
+and degree parameters will be inserted after rerun. The defensible conclusion
+at present is qualitative: a single-seed two-layer out-link BFS is a selected
+sampling frame, and profile-count and induced-degree estimators need not share
+the same bias.
 
 Any distributional claim from this dataset must therefore be stated
 relative to the sampling frame; §6's fits are reported for both estimators.

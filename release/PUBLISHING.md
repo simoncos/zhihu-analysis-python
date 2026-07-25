@@ -2,8 +2,9 @@
 
 前置：`zhihu.db` 就位后运行
 `python -m analysis.release --db zhihu.db --out release_build`。
-产物：`release_build/public/`（5 个 parquet + stats.json，可发布）、
-`release_build/private/`（ID 映射，**永不发布**，本地加密备份）。
+产物：`release_build/public/`（5 个 parquet + stats.json，候选发布物）、
+`release_build_private/`（默认的独立 ID 映射目录，**永不发布**，本地加密备份）。
+正式运行建议用 `--private-out /secure/location/zhihu2015-mappings` 明确指定仓库外路径。
 
 ## 发布前检查清单
 
@@ -14,7 +15,7 @@
 - [ ] 核对 stats.json 与 2015 报告记录数一致，回填 DATASHEET/DATASET_CARD 中的 [TODO]
 - [ ] 抽样人工检查 users.parquet：确认无 user_url/显示名残留
 - [ ] 确认 edges/user_questions 中的 id 均为整数（无原始字符串泄漏）
-- [ ] private/ 目录不在任何上传路径中；加入 .gitignore（已配置 release_build/）
+- [ ] 私有映射目录不在任何上传路径中；确认目录权限为 0700、文件为 0600
 - [ ] 用公开文件反向自查：能否用"计数指纹"轻易定位某个名人？在 DATASHEET
       残余风险一节如实记录结论（已做：92.4% 用户五元组唯一，已写入 DATASHEET）
 - [ ] **立即限制或删除 GitHub release `dataset-v0` 的 zhihu.zip 附件**（内含原始

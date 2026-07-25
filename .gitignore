@@ -3,3 +3,6 @@ __pycache__/
 *.db
 results/parquet/
 release_build/
+release_build_private/
+results/current/
+results/bfs-bias-current/

@@ -28,39 +28,41 @@ SQLite 表：`User`、`Following`、`Question`、`UserQuestion`、`UserTopic`。
 匿名化数据集尚未正式发布。原始数据库包含可识别的用户 URL/名称，不应继续公开
 传播或作为 README 中的下载入口。发布前必须执行
 [`release/PUBLISHING.md`](release/PUBLISHING.md) 的隐私检查，移除旧的未脱敏
-release 资产，再发布 `analysis.release` 生成的 `release_build/public/`；
-`release_build/private/` 永不上传。
+release 资产，再发布 `analysis.release` 生成的 `release_build/public/`；默认位于
+`release_build_private/` 的映射文件永不上传，正式运行应通过 `--private-out`
+指定仓库外的安全路径。
 
 ## Python 3 分析流水线
 
 核心环境：
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-lock.txt
 ```
 
 无真实数据时，可先运行合成数据库冒烟测试：
 
 ```bash
-python -m analysis.run_all --synth --out /tmp/zhihu-smoke --gof-sims 5
+python -m analysis.run_all --synth --out /tmp/zhihu-smoke
 ```
 
 真实数据到位后：
 
 ```bash
-# 数据体检、Parquet 导出、诱导图构建、七个序列的 CSN/GOF 分析
-python -m analysis.run_all --db zhihu.db --out results --gof-sims 100
-
-# 图结构、90-9-1 集中度、话题层和关注边话题同质性
-python -m analysis.characterize --parquet results/parquet --out results
+# 原子化完整流水线：体检、Parquet、诱导图、七序列 CSN/GOF、结构与 matched-null homophily
+python -m analysis.run_all --db zhihu.db --out results/current \
+  --gof-sims 2500 --homophily-null-reps 200
 
 # 不依赖真实数据的两层 BFS 采样偏差模拟
-python -m analysis.run_all --bfs-bias --out results
+python -m analysis.run_all --bfs-bias --out results/bfs-bias-current \
+  --bfs-graphs 5 --bfs-seeds-per-graph 2
 ```
 
 `analysis/powerlaw_fit.py` 会分别检验纯幂律与各备择分布，并直接比较截断幂律和
-对数正态；只有直接比较显著时才命名胜出模型。已提交结果的来源和重跑要求见
-[`results/README.md`](results/README.md)。
+对数正态；只有直接比较显著时才命名胜出模型。跳过 GOF 会明确标记为
+`Not evaluated`。完整运行通过临时目录构建并原子替换，同时生成记录数据库哈希、
+代码 SHA、dirty state、依赖、种子及产物哈希的 `run_manifest.json`。已提交旧结果
+的限制见 [`results/README.md`](results/README.md)。
 
 ## 专家发现实验
 
