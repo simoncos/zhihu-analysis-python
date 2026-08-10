@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Private credentials and session material used by the historical crawler.
+crawler/config.ini
+crawler/cookies
+crawler/verify.*
+cookies
+verify.*
+
+# Raw, reconstructed, derived, and candidate-release data stay outside Git.
+data/
+csv/
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.zip
+release_build*/
+results/current/
